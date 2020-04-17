@@ -10,23 +10,22 @@ class ValuesManager
     end
 
     def arg_value(name)
-      key_index = ARGV.find_index(name)
-      ARGV[key_index + 1] if key_index
+      self.arg_values(name)&.first
     end
 
     def run_env
       arg_value('-e') || ENV['NECTAR_K8S_ENV'] || 'development'
     end
 
+    def v_path(fname)
+      "values/#{fname}.yaml.erb"
+    end
+
     def file_values(fname, helper)
       file = File.read(fname)
       helper_binding = helper.get_binding
       interpolated_yaml = ERB.new(file).result(helper_binding)
-      YAML.load(interpolated_yaml)
-    end
-
-    def v_path(fname)
-      "values/#{fname}.yaml.erb"
+      YAML.load(interpolated_yaml).symbolize_keys_deep
     end
 
     def load(helper)
