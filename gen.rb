@@ -1,3 +1,5 @@
+require 'yaml'
+require 'active_support/core_ext/hash/keys'
 
 module Kerb
   class Gen
@@ -12,7 +14,9 @@ module Kerb
     end
 
     def res_id(hash)
-      "#{hash['kind']}:#{hash['metadata']['name']}" rescue ''
+      kind = hash[:kind]
+      name = hash[:metadata]&.[](:name)
+      kind && name ? "#{kind}:#{name}" : ''
     end
 
     def filter_res_only(hashes, rules)
@@ -25,16 +29,22 @@ module Kerb
       hashes.reject { |hash| rules.include?(res_id(hash)) }
     end
 
-    def interpolate(fname)
+    def resolve_file_name(fname)
+      return fname if File.exist?(fname)
       dir = self.class.get_location
-      full_name = "#{dir}/#{fname}.yaml.erb"
-      file = File.read(full_name)
-      ERB.new(file).result(self.send(:binding))
+      "#{dir}/#{fname}.yaml.erb"
     end
 
-    def inflate(fname, only: nil, except: nil)
-      interpolated_yaml = interpolate(fname)
+    def interpolate(fname, extras = {})
+      file = File.read(resolve_file_name(fname))
+      binding.local_variable_set(:extras, extras)
+      ERB.new(file).result(binding)
+    end
+
+    def inflate(fname, extras: {}, only: nil, except: nil)
+      interpolated_yaml = interpolate(fname, extras)
       hashes = YAML.load_stream(interpolated_yaml)
+      hashes = hashes.map(&:deep_symbolize_keys)
       hashes = filter_res_only(hashes, Array(only))
       filter_res_except(hashes, Array(except))
     end
