@@ -23,7 +23,8 @@ class ValuesManager
     end
 
     def file_values(fname, helper)
-      file = File.read(fname)
+      file = File.read(fname) rescue nil
+      return {} unless file
       helper_binding = helper.get_binding
       interpolated_yaml = ERB.new(file).result(helper_binding)
       YAML.load(interpolated_yaml).deep_symbolize_keys

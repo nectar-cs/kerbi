@@ -1,9 +1,16 @@
+require 'tempfile'
 require_relative './../values_manager'
 
 RSpec.describe ValuesManager do
 
   subject { ValuesManager }
 
+  def tmp_file(content)
+    f1 = Tempfile.new
+    f1 << content
+    f1.rewind
+    f1.path
+  end
 
   describe ".vpath" do
     it "produces the correct filename" do
@@ -83,12 +90,54 @@ RSpec.describe ValuesManager do
     end
   end
 
-  describe '.load'do
-    context 'when an'
+  describe '.load' do
+    def two_files(c1, c2, helper: Help.new)
+      f1 = tmp_file(YAML.dump(c1))
+      f2 = tmp_file(YAML.dump(c2))
+      ARGV.replace ['-f', f1, '-f', f2]
+      subject.load(helper)
+    end
+
+    describe 'tolerance' do
+      context 'when values.yaml.erb is missing' do
+
+      end
+    end
+    describe "merging" do
+      it 'merges correctly with nesting' do
+        result = two_files(
+          { a: 1, b: { b: 1 } },
+          { b: { b: 2, c: 3 } }
+        )
+        expect(result).to eq({a: 1, b: { b: 2, c: 3 }})
+      end
+
+      it 'merges correctly with arrays' do
+        result = two_files({ a: [1,2] }, { a: [3] })
+        expect(result).to eq({a: [3] })
+      end
+    end
+
+    describe "helping" do
+      it 'gets the correct helper values' do
+        result = two_files(
+          { k1: "<%= v1 %>" },
+          { k2: "<%= v2 %>" },
+          helper: Helper2.new
+        )
+        expect(result).to eq({k1: 'v1', k2: 'v2'})
+      end
+    end
   end
 end
 
 class Help
   def help()'delivered' end
+  def get_binding() binding end
+end
+
+class Helper2
+  def v1() 'v1' end
+  def v2() 'v2' end
   def get_binding() binding end
 end
