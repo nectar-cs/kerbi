@@ -1,6 +1,7 @@
+require 'active_support/core_ext/hash/keys'
+require 'active_support/core_ext/hash/deep_merge'
 require 'yaml'
 require 'erb'
-require_relative 'hash'
 
 class ValuesManager
   class << self
@@ -25,7 +26,7 @@ class ValuesManager
       file = File.read(fname)
       helper_binding = helper.get_binding
       interpolated_yaml = ERB.new(file).result(helper_binding)
-      YAML.load(interpolated_yaml).symbolize_keys_deep
+      YAML.load(interpolated_yaml).deep_symbolize_keys
     end
 
     def load(helper)
@@ -35,7 +36,7 @@ class ValuesManager
         values = file_values(file_name, helper)
         merged.deep_merge(values)
       end
-      result.symbolize_keys_deep
+      result.deep_symbolize_keys
     end
   end
 end
