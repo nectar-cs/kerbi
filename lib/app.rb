@@ -18,7 +18,9 @@ module Kerbi
     end
 
     def gen_yaml
-      self.gen.map{|h|YAML.dump(h)}.join("\n")
+      self.gen.map do |h|
+        YAML.dump h.deep_stringify_keys
+      end.join("\n")
     end
   end
 end

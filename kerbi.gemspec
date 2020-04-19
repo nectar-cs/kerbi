@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.description = "Hash manipulation for generating Kubernetes manifests."
   s.authors     = ["Xavier Millot"]
   s.email       = 'xavier@codenectar.com'
-  s.files       = Dir['lib/*.rb']
+  s.files       = Dir['lib/*.rb'] +  Dir['lib/templates/*.rb']
   s.homepage    = 'https://rubygems.org/gems/kerbi'
   s.license     = 'MIT'
 end

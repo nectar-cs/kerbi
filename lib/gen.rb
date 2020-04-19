@@ -12,6 +12,12 @@ module Kerbi
       @values = values
     end
 
+    def safe_gen(&block)
+      bucket = Kerbi::Bucket.new(self)
+      block.call(bucket)
+      bucket.output.flatten
+    end
+
     def gen
       raise 'Unimplemented'
     end
@@ -44,12 +50,16 @@ module Kerbi
       ERB.new(file).result(binding)
     end
 
-    def inflate(fname, extras: {}, only: nil, except: nil)
-      interpolated_yaml = interpolate(fname, extras)
-      hashes = YAML.load_stream(interpolated_yaml)
+    def process(hashes, only, except)
       hashes = hashes.map(&:deep_symbolize_keys)
       hashes = filter_res_only(hashes, Array(only))
       filter_res_except(hashes, Array(except))
+    end
+
+    def inflate_yaml(fname, extras: {}, only: nil, except: nil)
+      interpolated_yaml = interpolate(fname, extras)
+      hashes = YAML.load_stream(interpolated_yaml)
+      process(hashes, only, except)
     end
 
     class << self
@@ -60,6 +70,30 @@ module Kerbi
       def get_location
         @dir_location
       end
+    end
+  end
+
+  class Bucket
+    attr_reader :output
+    attr_reader :parent
+
+    def initialize(parent)
+      @parent = parent
+      @output = []
+    end
+
+    def yaml(*args)
+      output << parent.inflate_yaml(*args)
+    end
+
+    def hash(hash, *args)
+      hash = [hash] unless hash.is_a?(Array)
+      output << parent.process(hash, args[1], args[2])
+    end
+
+    def method_missing(method, *args)
+      parent.send(method, *args) if parent.respond_to?(method)
+      super
     end
   end
 end

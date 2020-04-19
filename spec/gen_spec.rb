@@ -5,6 +5,16 @@ RSpec.describe Kerbi::Gen do
 
   subject { Kerbi::Gen.new({}) }
 
+  describe "#gen2" do
+    it 'works' do
+      result = subject.safe_gen do |r|
+        r.yaml tmp_file(YAML.dump({ k1: 'v1' }))
+        r.hash k2: 'v2'
+      end
+      expect(result).to eq([{k1: 'v1'}, {k2: 'v2'}])
+    end
+  end
+
   describe ".locate_self" do
     it "stores and later outputs the value" do
       class Subclass < Kerbi::Gen
@@ -113,7 +123,7 @@ RSpec.describe Kerbi::Gen do
     end
   end
 
-  describe "#inflate" do
+  describe "#inflate_yaml" do
     class Kerbi::Gen;
       def kind_a() 'KindA' end
       def kind_b() 'KindB' end
@@ -136,21 +146,21 @@ RSpec.describe Kerbi::Gen do
 
     context 'without filters' do
       it 'performs correctly' do
-        result = subject.inflate(f)
+        result = subject.inflate_yaml(f)
         expect(result).to eq(full_hashes)
       end
     end
 
     context 'with only filter' do
       it 'performs correctly' do
-        result = subject.inflate(f, only: "KindA:A")
+        result = subject.inflate_yaml(f, only: "KindA:A")
         expect(result).to eq([full_hashes[0]])
       end
     end
 
     context 'with only filter' do
       it 'performs correctly' do
-        result = subject.inflate(f, except: "KindB:B")
+        result = subject.inflate_yaml(f, except: "KindB:B")
         expect(result).to eq([full_hashes[0], full_hashes[2]])
       end
     end
