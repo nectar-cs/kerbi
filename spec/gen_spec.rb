@@ -1,15 +1,13 @@
 require 'spec_helper'
 require_relative './../lib/gen'
 
-RSpec.describe Kerb::Gen do
+RSpec.describe Kerbi::Gen do
 
-  subject do
-    Kerb::Gen.new({})
-  end
+  subject { Kerbi::Gen.new({}) }
 
   describe ".locate_self" do
     it "stores and later outputs the value" do
-      class Subclass < Kerb::Gen
+      class Subclass < Kerbi::Gen
         locate_self 'foo'
       end
       expect(Subclass.new({}).class.get_location).to eq('foo')
@@ -95,15 +93,15 @@ RSpec.describe Kerb::Gen do
     end
 
     context 'with bindings' do
-      subject { Kerb::Gen.new({x: 'y'}) }
+      subject { Kerbi::Gen.new({x: 'y'}) }
       it 'reads the values hash' do
         f = tmp_file("k1: <%= values[:x] %>")
         expect(subject.interpolate(f)).to eq("k1: y")
       end
 
       it 'reads regular instance methods' do
-        class Kerb::Gen; def x() 'yy' end; end
-        f = tmp_file("k1: <%= x %>")
+        class Kerbi::Gen; def xx() 'yy' end; end
+        f = tmp_file("k1: <%= xx %>")
         expect(subject.interpolate(f)).to eq("k1: yy")
       end
     end
@@ -116,9 +114,9 @@ RSpec.describe Kerb::Gen do
   end
 
   describe "#inflate" do
-    class Kerb::Gen;
-      def kind_a() 'KindA' end;
-      def kind_b() 'KindB' end;
+    class Kerbi::Gen;
+      def kind_a() 'KindA' end
+      def kind_b() 'KindB' end
     end
 
     let :full_hashes do [
@@ -156,6 +154,5 @@ RSpec.describe Kerb::Gen do
         expect(result).to eq([full_hashes[0], full_hashes[2]])
       end
     end
-
   end
 end

@@ -3,7 +3,7 @@ require 'active_support/core_ext/hash/deep_merge'
 require 'yaml'
 require 'erb'
 
-module Kerb
+module Kerbi
   class ValMan
     class << self
       def arg_values(name)

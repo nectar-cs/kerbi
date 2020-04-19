@@ -1,11 +1,11 @@
 require 'spec_helper'
 require_relative './../lib/base_helper'
 
-RSpec.describe Kerb::BaseHelper do
+RSpec.describe Kerbi::BaseHelper do
 
   subject do
     class Demo
-      include Kerb::BaseHelper
+      include Kerbi::BaseHelper
     end.new
   end
 

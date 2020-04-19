@@ -1,6 +1,6 @@
 require "base64"
 
-module Kerb
+module Kerbi
   module BaseHelper
     def secrefy(string)
       Base64.encode64(string)

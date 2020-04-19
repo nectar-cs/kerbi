@@ -1,9 +1,9 @@
 require 'spec_helper'
 require_relative './../lib/val_man'
 
-RSpec.describe Kerb::ValMan do
+RSpec.describe Kerbi::ValMan do
 
-  subject { Kerb::ValMan }
+  subject { Kerbi::ValMan }
 
   describe ".vpath" do
     it "produces the correct filename" do

@@ -1,10 +1,10 @@
 require 'yaml'
 require 'active_support/core_ext/hash/keys'
-require  'base_helper'
+require 'base_helper'
 
-module Kerb
+module Kerbi
   class Gen
-    include Kerb::BaseHelper
+    include Kerbi::BaseHelper
 
     attr_reader :values
 

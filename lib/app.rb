@@ -1,7 +1,7 @@
 require "base64"
 require_relative 'val_man'
 
-module Kerb
+module Kerbi
   class App
     attr_accessor :values_helper
     attr_accessor :generators
@@ -23,6 +23,6 @@ module Kerb
   end
 end
 
-def kerb
-  @kerb ||= Kerb::App.new
+def kerbi
+  @kerbi ||= Kerbi::App.new
 end
