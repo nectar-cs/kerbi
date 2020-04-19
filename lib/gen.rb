@@ -1,8 +1,11 @@
 require 'yaml'
 require 'active_support/core_ext/hash/keys'
+require  'base_helper'
 
 module Kerb
   class Gen
+    include Kerb::BaseHelper
+
     attr_reader :values
 
     def initialize(values)
@@ -10,7 +13,7 @@ module Kerb
     end
 
     def gen
-      []
+      raise 'Unimplemented'
     end
 
     def res_id(hash)
@@ -47,10 +50,6 @@ module Kerb
       hashes = hashes.map(&:deep_symbolize_keys)
       hashes = filter_res_only(hashes, Array(only))
       filter_res_except(hashes, Array(except))
-    end
-
-    def secrify(string)
-      Base64.encode64(string)
     end
 
     class << self

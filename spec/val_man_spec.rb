@@ -1,16 +1,9 @@
-require 'tempfile'
-require_relative './../values_manager'
+require 'spec_helper'
+require_relative './../lib/val_man'
 
-RSpec.describe ValuesManager do
+RSpec.describe Kerb::ValMan do
 
-  subject { ValuesManager }
-
-  def tmp_file(content)
-    f1 = Tempfile.new
-    f1 << content
-    f1.rewind
-    f1.path
-  end
+  subject { Kerb::ValMan }
 
   describe ".vpath" do
     it "produces the correct filename" do
@@ -83,7 +76,7 @@ RSpec.describe ValuesManager do
   describe '.file_values' do
     context 'with a valid file and binding' do
       it 'correctly interpolates using the helper' do
-        path = 'spec/mock_values.yaml.erb'
+        path = tmp_file("foo: bar\nbaz: <%= help %>")
         output = subject.file_values(path, Help.new)
         expect(output[:baz]).to eq('delivered')
       end
@@ -91,21 +84,15 @@ RSpec.describe ValuesManager do
   end
 
   describe '.load' do
-    def two_files(c1, c2, helper: Help.new)
-      f1 = tmp_file(YAML.dump(c1))
-      f2 = tmp_file(YAML.dump(c2))
-      ARGV.replace ['-f', f1, '-f', f2]
-      subject.load(helper)
-    end
-
     describe 'tolerance' do
       context 'when values.yaml.erb is missing' do
 
       end
     end
+
     describe "merging" do
       it 'merges correctly with nesting' do
-        result = two_files(
+        result = two_yaml_files(
           { a: 1, b: { b: 1 } },
           { b: { b: 2, c: 3 } }
         )
@@ -113,14 +100,14 @@ RSpec.describe ValuesManager do
       end
 
       it 'merges correctly with arrays' do
-        result = two_files({ a: [1,2] }, { a: [3] })
+        result = two_yaml_files({a: [1, 2] }, {a: [3] })
         expect(result).to eq({a: [3] })
       end
     end
 
     describe "helping" do
       it 'gets the correct helper values' do
-        result = two_files(
+        result = two_yaml_files(
           { k1: "<%= v1 %>" },
           { k2: "<%= v2 %>" },
           helper: Helper2.new
@@ -129,11 +116,6 @@ RSpec.describe ValuesManager do
       end
     end
   end
-end
-
-class Help
-  def help()'delivered' end
-  def get_binding() binding end
 end
 
 class Helper2

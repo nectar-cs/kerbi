@@ -1,5 +1,5 @@
 require "base64"
-require_relative 'values_manager'
+require_relative 'val_man'
 
 module Kerb
   class App
@@ -7,7 +7,7 @@ module Kerb
     attr_accessor :generators
 
     def values
-      @values ||= ValuesManager.load(values_helper)
+      @values ||= ValMan.load(values_helper)
     end
 
     def gen

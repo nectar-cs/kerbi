@@ -1,17 +1,19 @@
-require 'tempfile'
-require_relative './../gen'
+require 'spec_helper'
+require_relative './../lib/gen'
 
 RSpec.describe Kerb::Gen do
 
-  def tmp_file(content)
-    f1 = Tempfile.new
-    f1 << content
-    f1.rewind
-    f1.path
-  end
-
   subject do
     Kerb::Gen.new({})
+  end
+
+  describe ".locate_self" do
+    it "stores and later outputs the value" do
+      class Subclass < Kerb::Gen
+        locate_self 'foo'
+      end
+      expect(Subclass.new({}).class.get_location).to eq('foo')
+    end
   end
 
   describe "#res_id" do
@@ -105,5 +107,55 @@ RSpec.describe Kerb::Gen do
         expect(subject.interpolate(f)).to eq("k1: yy")
       end
     end
+  end
+
+  describe '#gen' do
+    it 'raises unimplemented' do
+      expect{subject.gen}.to raise_exception("Unimplemented")
+    end
+  end
+
+  describe "#inflate" do
+    class Kerb::Gen;
+      def kind_a() 'KindA' end;
+      def kind_b() 'KindB' end;
+    end
+
+    let :full_hashes do [
+      { kind: "KindA", metadata: {name: "A"} },
+      { kind: "KindB", metadata: {name: "B"} },
+      { x: 'y' }
+    ] end
+
+    let :hashes do [
+      { kind: "<%= kind_a %>", metadata: {name: "A"} },
+      { kind: "<%= kind_b %>", metadata: {name: "B"} },
+      { x: 'y' }
+    ] end
+    let :f do
+      tmp_file(YAML.dump_stream(*hashes))
+    end
+
+    context 'without filters' do
+      it 'performs correctly' do
+        result = subject.inflate(f)
+        expect(result).to eq(full_hashes)
+      end
+    end
+
+    context 'with only filter' do
+      it 'performs correctly' do
+        result = subject.inflate(f, only: "KindA:A")
+        expect(result).to eq([full_hashes[0]])
+      end
+    end
+
+    context 'with only filter' do
+      it 'performs correctly' do
+        result = subject.inflate(f, except: "KindB:B")
+        expect(result).to eq([full_hashes[0], full_hashes[2]])
+      end
+    end
+
   end
 end
