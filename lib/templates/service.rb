@@ -16,6 +16,7 @@ module Kerbi
       def generic_service(subs)
         {
           kind: 'Service',
+          apiVersion: 'v1',
           metadata: metadata(subs),
           spec: {
             type: subs[:type] || 'ClusterIP',
