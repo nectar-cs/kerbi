@@ -1,6 +1,7 @@
 
 steps:
   - name: 'gcr.io/cloud-builders/docker'
+    id: 'test-phase'
     args:
       - 'build'
       - '.'
@@ -8,6 +9,9 @@ steps:
       - 'RunTestsDockerfile'
 
   - name: 'gcr.io/cloud-builders/docker'
+    id: 'publish-phase'
+    waitFor:
+      - 'test-phase'
     args:
       - 'build'
       - '.'
