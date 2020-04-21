@@ -1,0 +1,17 @@
+FROM ruby:2.6.3-alpine3.10
+
+ENV NO_COVERAGE 'true'
+
+WORKDIR /app
+
+RUN apk --update add build-base libxslt-dev libxml2-dev
+
+ADD Gemfile Gemfile.lock ./
+
+RUN gem install bundler && \
+     bundle config set without 'development' && \
+     bundle install --jobs 20 --retry 5
+
+ADD . ./
+
+RUN bundle exec rspec -fd

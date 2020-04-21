@@ -2,4 +2,4 @@
 /coverage
 *.gem
 .gitignore
-/spec
+cloudbuild.yaml

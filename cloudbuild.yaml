@@ -1,0 +1,15 @@
+
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '.'
+      - '-t'
+      - 'RunTestsDockerfile'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '.'
+      - '-t'
+      - 'PublishGemDockerfile'

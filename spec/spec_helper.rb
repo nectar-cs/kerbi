@@ -20,5 +20,5 @@ class Help
   def get_binding() binding end
 end
 
-SimpleCov.start
+SimpleCov.start unless ENV['NO_COVERAGE']
 
