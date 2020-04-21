@@ -13,3 +13,5 @@ steps:
       - '.'
       - '-f'
       - 'PublishGemDockerfile'
+      - '--build-arg'
+      - 'RUBYGEMS_API_KEY=${_RUBYGEMS_API_KEY}'
