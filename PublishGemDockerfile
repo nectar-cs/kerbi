@@ -6,6 +6,9 @@ ARG RUBYGEMS_API_KEY
 ENV CRED_DIR /root/.gem
 ENV CRED_PATH "$CRED_DIR/credentials"
 
+RUN echo "$_RUBYGEMS_API_KEY"
+RUN echo "$RUBYGEMS_API_KEY"
+
 RUN mkdir "$CRED_DIR"
 RUN echo ":rubygems_api_key: $RUBYGEMS_API_KEY" > "$CRED_PATH"
 RUN chmod 0600 "$CRED_PATH"
