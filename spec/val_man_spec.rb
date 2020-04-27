@@ -5,10 +5,16 @@ RSpec.describe Kerbi::ValMan do
 
   subject { Kerbi::ValMan }
 
-  describe ".vpath" do
+  describe ".value_paths" do
     it "produces the correct filename" do
-      result = subject.v_path('foo')
-      expect(result).to eq('values/foo.yaml.erb')
+      result = subject.values_paths('foo')
+      expected = [
+        'values/foo.yaml.erb',
+        'values/foo.yaml',
+        'foo.yaml.erb',
+        'foo.yaml'
+      ]
+      expect(result).to match_array(expected)
     end
   end
 
@@ -73,28 +79,39 @@ RSpec.describe Kerbi::ValMan do
     end
   end
 
-  describe '.file_values' do
-    context 'with a valid file and binding' do
-      it 'correctly interpolates using the helper' do
-        path = tmp_file("foo: bar\nbaz: <%= help %>")
-        output = subject.file_values(path, Help.new)
-        expect(output[:baz]).to eq('delivered')
+  describe '.read_values_file' do
+    context 'when the file exists' do
+      context 'with a helper' do
+        it 'correctly interpolates using the helper' do
+          path = tmp_file("foo: bar\nbaz: <%= help %>")
+          output = subject.read_values_file(path, Help.new)
+          expect(output[:baz]).to eq('delivered')
+        end
+      end
+
+      context 'without a helper' do
+        it 'correctly loads the yaml' do
+          path = tmp_file("foo: bar\nbaz: bar2")
+          output = subject.read_values_file(path, Help.new)
+          expect(output).to eq({foo: 'bar', baz: 'bar2'})
+        end
+      end
+    end
+    context 'when the file does not exist' do
+      it 'returns an empty hash' do
+        output = subject.read_values_file('/bad-path', Help.new)
+        expect(output).to eq({})
       end
     end
   end
 
   describe '.load' do
-    describe 'tolerance' do
-      context 'when values.yaml.erb is missing' do
-
-      end
-    end
-
     describe "merging" do
       it 'merges correctly with nesting' do
         result = two_yaml_files(
           { a: 1, b: { b: 1 } },
-          { b: { b: 2, c: 3 } }
+          { b: { b: 2, c: 3 } },
+          helper: nil
         )
         expect(result).to eq({a: 1, b: { b: 2, c: 3 }})
       end
@@ -102,6 +119,20 @@ RSpec.describe Kerbi::ValMan do
       it 'merges correctly with arrays' do
         result = two_yaml_files({a: [1, 2] }, {a: [3] })
         expect(result).to eq({a: [3] })
+      end
+
+      it 'merges correctly with empty hashes' do
+        result = n_yaml_files(
+          hashes: [
+            {},
+            { a: 1, b: { b: 1 } },
+            {},
+            { b: { b: 2, c: 3 } },
+            {},
+          ],
+          helper: nil
+        )
+        expect(result).to eq({a: 1, b: { b: 2, c: 3 }})
       end
     end
 

@@ -19,23 +19,33 @@ module Kerbi
         arg_value('-e') || ENV['NECTAR_K8S_ENV'] || 'development'
       end
 
-      def v_path(fname)
-        "values/#{fname}.yaml.erb"
+      def values_paths(fname)
+        [
+          "values/#{fname}.yaml.erb",
+          "values/#{fname}.yaml",
+          "#{fname}.yaml.erb",
+          "#{fname}.yaml",
+        ]
       end
 
-      def file_values(fname, helper)
-        file = File.read(fname) rescue nil
-        return {} unless file
-        helper_binding = helper.get_binding
-        interpolated_yaml = ERB.new(file).result(helper_binding)
-        YAML.load(interpolated_yaml).deep_symbolize_keys
+      def all_values_paths
+        [
+          *values_paths('values'),
+          *values_paths(run_env),
+          *arg_values('-f')
+        ].compact
+      end
+
+      def read_values_file(fname, helper)
+        file_cont = File.read(fname) rescue nil
+        return {} unless file_cont
+        file_cont = ERB.new(file_cont).result(helper.get_binding) if helper
+        YAML.load(file_cont).deep_symbolize_keys
       end
 
       def load(helper)
-        env_file = run_env && v_path(run_env)
-        file_names = [v_path('values'), env_file, *arg_values('-f')].compact
-        result = file_names.inject({}) do |merged, file_name|
-          values = file_values(file_name, helper)
+        result = all_values_paths.inject({}) do |merged, file_name|
+          values = read_values_file(file_name, helper)
           merged.deep_merge(values)
         end
         result.deep_symbolize_keys
