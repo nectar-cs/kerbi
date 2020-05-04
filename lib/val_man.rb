@@ -21,6 +21,8 @@ module Kerbi
 
       def values_paths(fname)
         [
+          fname,
+          "values/#{fname}",
           "values/#{fname}.yaml.erb",
           "values/#{fname}.yaml",
           "#{fname}.yaml.erb",

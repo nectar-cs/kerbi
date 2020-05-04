@@ -9,10 +9,12 @@ RSpec.describe Kerbi::ValMan do
     it "produces the correct filename" do
       result = subject.values_paths('foo')
       expected = [
+        'foo',
+        'values/foo',
         'values/foo.yaml.erb',
         'values/foo.yaml',
         'foo.yaml.erb',
-        'foo.yaml'
+        'foo.yaml',
       ]
       expect(result).to match_array(expected)
     end
