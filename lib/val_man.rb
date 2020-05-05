@@ -41,6 +41,8 @@ module Kerbi
       def read_values_file(fname, helper)
         file_cont = File.read(fname) rescue nil
         return {} unless file_cont
+        puts "REAL FILE #{fname}:"
+        puts file_cont
         file_cont = ERB.new(file_cont).result(helper.get_binding) if helper
         YAML.load(file_cont).deep_symbolize_keys
       end
@@ -48,6 +50,8 @@ module Kerbi
       def load(helper)
         puts "COMING IN WITH THE FOLLOWING ARGS"
         puts ARGV
+        puts "The RUNENV IS #{run_env}"
+
         result = all_values_paths.inject({}) do |merged, file_name|
           values = read_values_file(file_name, helper)
           merged.deep_merge(values)
