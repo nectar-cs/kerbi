@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'kerbi'
-  s.version     = '1.0.12'
+  s.version     = '1.0.15'
   s.date        = '2020-04-19'
   s.summary     = "Kubernetes manifest generator"
   s.description = "Multi-strategy YAML generation based on Ruby, ERB, and YAML"
