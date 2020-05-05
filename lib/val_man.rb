@@ -48,9 +48,6 @@ module Kerbi
       def load(helper)
         puts "COMING IN WITH THE FOLLOWING ARGS"
         puts ARGV
-        ARGV.each do a
-          puts(a)
-        end
         result = all_values_paths.inject({}) do |merged, file_name|
           values = read_values_file(file_name, helper)
           merged.deep_merge(values)
