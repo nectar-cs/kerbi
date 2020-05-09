@@ -15,10 +15,10 @@ def two_yaml_files(c1, c2, helper: Help.new)
   subject.load(helper)
 end
 
-def n_yaml_files(hashes:, helper:)
+def n_yaml_files(hashes:, helper:, more_args: [])
   files = hashes.map { |c| tmp_file(YAML.dump(c)) }
   args = files.map { |f| ['-f', f] }.flatten
-  ARGV.replace(args)
+  ARGV.replace(args + more_args)
   subject.load(helper)
 end
 

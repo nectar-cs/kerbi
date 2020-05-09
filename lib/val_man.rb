@@ -6,6 +6,12 @@ require 'erb'
 module Kerbi
   class ValMan
     class << self
+      def str_assign_to_h(str_assign)
+        key_expr, value = str_assign.split(":")
+        assign_parts = key_expr.split(".") << value
+        assign_parts.reverse.inject{ |a,n| { n=>a } }.deep_symbolize_keys
+      end
+
       def arg_values(name)
         indicies = ARGV.each_index.select { |i| ARGV[i]==name }
         indicies.map { |key_index| ARGV[key_index + 1] }
@@ -45,10 +51,18 @@ module Kerbi
         YAML.load(file_cont).deep_symbolize_keys
       end
 
+      def read_arg_assignments
+        str_assignments = arg_values("--set")
+        str_assignments.inject({}) do |whole, str_assignment|
+          whole.merge(str_assign_to_h(str_assignment))
+        end
+      end
+
       def load(helper)
-        result = all_values_paths.inject({}) do |merged, file_name|
-          values = read_values_file(file_name, helper)
-          merged.deep_merge(values)
+        result = all_values_paths.inject({}) do |whole, file_name|
+          whole.
+            deep_merge(read_values_file(file_name, helper)).
+            deep_merge(read_arg_assignments)
         end
         result.deep_symbolize_keys
       end

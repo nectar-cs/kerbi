@@ -5,6 +5,23 @@ RSpec.describe Kerbi::ValMan do
 
   subject { Kerbi::ValMan }
 
+  describe ".str_assign_to_h" do
+    it "returns the right hash" do
+      result = subject.str_assign_to_h("foo.bar:baz")
+      expect(result).to eq({foo: {bar: 'baz'}})
+    end
+  end
+
+  describe ".read_arg_values" do
+    context "when --set flags are passed" do
+      it "returns a merged hash" do
+        ARGV.replace %w[--set foo:bar --set x:y]
+        actual = subject.read_arg_assignments
+        expect(actual).to eq(foo: 'bar', x: 'y')
+      end
+    end
+  end
+
   describe ".value_paths" do
     it "produces the correct filename" do
       result = subject.values_paths('foo')
@@ -110,12 +127,16 @@ RSpec.describe Kerbi::ValMan do
   describe '.load' do
     describe "merging" do
       it 'merges correctly with nesting' do
-        result = two_yaml_files(
-          { a: 1, b: { b: 1 } },
-          { b: { b: 2, c: 3 } },
+        result = n_yaml_files(
+          hashes: [
+            { a: 1, b: { b: 1 } },
+            { b: { b: 2, c: 3 } },
+            { x: 'y1' }
+          ],
+          more_args: %W[--set x:y2],
           helper: nil
         )
-        expect(result).to eq({a: 1, b: { b: 2, c: 3 }})
+        expect(result).to eq(a: 1, b: { b: 2, c: 3 }, x: 'y2')
       end
 
       it 'merges correctly with arrays' do
