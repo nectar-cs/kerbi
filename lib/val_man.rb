@@ -9,7 +9,8 @@ module Kerbi
       def str_assign_to_h(str_assign)
         key_expr, value = str_assign.split(":")
         assign_parts = key_expr.split(".") << value
-        assign_parts.reverse.inject{ |a,n| { n=>a } }.deep_symbolize_keys
+        assignment = assign_parts.reverse.inject{ |a,n| { n=>a } }
+        assignment.deep_symbolize_keys
       end
 
       def arg_values(name)
@@ -54,7 +55,8 @@ module Kerbi
       def read_arg_assignments
         str_assignments = arg_values("--set")
         str_assignments.inject({}) do |whole, str_assignment|
-          whole.merge(str_assign_to_h(str_assignment))
+          assignment = str_assign_to_h(str_assignment)
+          whole.deep_merge(assignment)
         end
       end
 

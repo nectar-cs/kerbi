@@ -14,10 +14,20 @@ RSpec.describe Kerbi::ValMan do
 
   describe ".read_arg_values" do
     context "when --set flags are passed" do
-      it "returns a merged hash" do
-        ARGV.replace %w[--set foo:bar --set x:y]
-        actual = subject.read_arg_assignments
-        expect(actual).to eq(foo: 'bar', x: 'y')
+      context "without nil conflicts" do
+        it "returns a merged hash" do
+          ARGV.replace %w[--set foo:bar --set x:y]
+          actual = subject.read_arg_assignments
+          expect(actual).to eq(foo: 'bar', x: 'y')
+        end
+      end
+      context "with nil conflicts" do
+        it "returns a merged hash" do
+          ARGV.replace %w[--set foo.bar:bar --set foo.baz:baz]
+          actual = subject.read_arg_assignments
+          expected = { foo: { bar: 'bar', baz: 'baz' } }
+          expect(actual).to eq(expected)
+        end
       end
     end
   end
@@ -25,13 +35,13 @@ RSpec.describe Kerbi::ValMan do
   describe ".value_paths" do
     it "produces the correct filename" do
       result = subject.values_paths('foo')
-      expected = [
-        'foo',
-        'values/foo',
-        'values/foo.yaml.erb',
-        'values/foo.yaml',
-        'foo.yaml.erb',
-        'foo.yaml',
+      expected = %w[
+        foo
+        values/foo
+        values/foo.yaml.erb
+        values/foo.yaml
+        foo.yaml.erb
+        foo.yaml
       ]
       expect(result).to match_array(expected)
     end
