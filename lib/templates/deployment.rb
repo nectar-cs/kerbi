@@ -21,7 +21,7 @@ module Kerbi
           apiVersion: 'apps/v1',
           metadata: metadata(subs),
           spec: {
-            replicas: 1,
+            replicas: subs[:replicas] || 1,
             selector: {
               matchLabels: meta_labels(subs[:name], subs[:selector_labels])
             },
