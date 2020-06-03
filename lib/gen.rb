@@ -1,6 +1,7 @@
 require 'yaml'
 require 'active_support/core_ext/hash/keys'
 require 'base_helper'
+require_relative 'utils'
 
 module Kerbi
   class Gen
@@ -12,7 +13,7 @@ module Kerbi
       @values = values
     end
 
-    def safe_gen(&block)
+    def poly_gen(&block)
       bucket = Kerbi::Bucket.new(self)
       block.call(bucket)
       bucket.output.flatten
@@ -39,13 +40,21 @@ module Kerbi
     end
 
     def resolve_file_name(fname)
-      return fname if File.exist?(fname)
       dir = self.class.get_location
-      "#{dir}/#{fname}.yaml.erb"
+      Kerbi::Utils.try_paths(
+        fname,
+        "#{fname}.yaml",
+        "#{fname}.yaml.erb",
+        "#{dir}/#{fname}",
+        "#{dir}/#{fname}.yaml",
+        "#{dir}/#{fname}.yaml.erb",
+      )
     end
 
     def interpolate(fname, extras = {})
-      file = File.read(resolve_file_name(fname))
+      file_path = resolve_file_name(fname)
+      raise "Could not resolve for #{fname}" unless file_path
+      file = File.read(file_path)
       binding.local_variable_set(:extras, extras)
       ERB.new(file).result(binding)
     end

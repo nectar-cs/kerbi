@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'main_helper'
 require_relative './../lib/val_man'
 
 RSpec.describe Kerbi::ValMan do

@@ -4,14 +4,18 @@ module Kerbi
   class DeploymentTemplate < Kerbi::ResTemplate
 
     class << self
-      def container(name:, image:, cmd:, envs:, image_pull_policy:)
-        cmd = cmd.split(' ') unless cmd.is_a?(Array)
+      def container(**options)
+        defaults = { name: 'main', ipp: 'Always', env: [] }
+        options = defaults.merge(options)
+        command = options[:cmd] || options[:command]
+        command = command&.split(' ') unless command.is_a?(Array)
+
         {
-          name: name,
-          image: image,
-          imagePullPolicy: image_pull_policy,
-          command: cmd,
-          env: envs
+          name: options[:name],
+          image: options[:image],
+          imagePullPolicy: options[:image_pull_policy] || options[:ipp],
+          command: command,
+          env: options[:envs] || options[:env]
         }
       end
 

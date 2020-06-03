@@ -1,13 +1,13 @@
-require 'spec_helper'
+require 'main_helper'
 require_relative './../lib/gen'
 
 RSpec.describe Kerbi::Gen do
 
   subject { Kerbi::Gen.new({}) }
 
-  describe "#gen2" do
+  describe "#safely_gen" do
     it 'works' do
-      result = subject.safe_gen do |r|
+      result = subject.poly_gen do |r|
         r.yaml tmp_file(YAML.dump({ k1: 'v1' }))
         r.hash k2: 'v2'
       end
@@ -70,21 +70,21 @@ RSpec.describe Kerbi::Gen do
     end
   end
 
-  describe "#resolve_file_name" do
-    context 'when fname is not a real file' do
-      it 'returns the assumed fully qualified name' do
-        allow(subject.class).to receive(:get_location).and_return('/foo')
-        expect(subject.resolve_file_name('bar')).to eq('/foo/bar.yaml.erb')
-      end
-    end
-
-    context 'when fname is a real file' do
-      it 'returns the original fname'do
-        result = subject.resolve_file_name('/dev/null')
-        expect(result).to eq('/dev/null')
-      end
-    end
-  end
+  # describe "#resolve_file_name" do
+  #   context 'when fname is not a real file' do
+  #     it 'returns the assumed fully qualified name' do
+  #       allow(subject.class).to receive(:get_location).and_return('/tmp')
+  #       expect(subject.resolve_file_name('bar')).to eq('/foo/bar.yaml.erb')
+  #     end
+  #   end
+  #
+  #   context 'when fname is a real file' do
+  #     it 'returns the original fname'do
+  #       result = subject.resolve_file_name('/dev/null')
+  #       expect(result).to eq('/dev/null')
+  #     end
+  #   end
+  # end
 
   describe 'interpolate' do
     context 'without extras or a binding' do

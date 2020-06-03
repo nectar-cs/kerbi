@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'main_helper'
 require_relative './../lib/base_helper'
 
 RSpec.describe Kerbi::BaseHelper do
@@ -11,7 +11,7 @@ RSpec.describe Kerbi::BaseHelper do
 
   describe '#secrefy' do
     it 'returns the base64 encoding' do
-      expect(subject.secrefy('demo')).to eq("ZGVtbw==\n")
+      expect(subject.b64_secret_encode('demo')).to eq("ZGVtbw==\n")
     end
   end
 end

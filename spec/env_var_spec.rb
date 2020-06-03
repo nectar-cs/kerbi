@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'main_helper'
 require_relative './../lib/templates/env_var_template'
 
 RSpec.describe Kerbi::EnvVarTemplate do

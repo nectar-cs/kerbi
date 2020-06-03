@@ -27,14 +27,8 @@ module Kerbi
       end
 
       def values_paths(fname)
-        [
-          fname,
-          "values/#{fname}",
-          "values/#{fname}.yaml.erb",
-          "values/#{fname}.yaml",
-          "#{fname}.yaml.erb",
-          "#{fname}.yaml",
-        ]
+        possibilities = [fname, "values/#{fname}", "values/#{fname}.yaml.erb"]
+        possibilities + %W[values/#{fname}.yaml #{fname}.yaml.erb #{fname}.yaml]
       end
 
       def all_values_paths
