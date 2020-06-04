@@ -10,38 +10,24 @@ module Kerbi
 
     attr_reader :values
 
+    # Initializes with a Gen
+    #
+    # @param [Hash, #read] contents the contents to reverse
+    # @return [String] the contents reversed lexically
     def initialize(values)
       @values = values
     end
 
-    def this_dir
-      self.class.get_location
-    end
-
-    def safe_gen(&block)
-      bucket = Kerbi::Bucket.new(self)
-      block.call(bucket)
-      bucket.output.flatten
-    end
-
-    def gen
-      raise 'Unimplemented'
-    end
-
-    def res_id(hash)
-      kind = hash[:kind]
-      name = hash[:metadata]&.[](:name)
-      kind && name ? "#{kind}:#{name}" : ''
-    end
-
-    def filter_res_only(hashes, rules)
-      return hashes if rules.compact.empty?
-      hashes.select { |hash| rules.include?(res_id(hash)) }
-    end
-
-    def filter_res_except(hashes, rules)
-      return hashes if rules.compact.empty?
-      hashes.reject { |hash| rules.include?(res_id(hash)) }
+    ##
+    # Where users should return a hash or
+    # an array of hashes representing Kubernetes resources
+    #
+    # @yield [bucket] Description of block
+    # @return [[Hash]] array of hashes representing Kubernetes resources
+    def gen(&block)
+      if block_given?
+        safe_gen(&block)
+      end
     end
 
     def resolve_file_name(fname)
@@ -88,6 +74,10 @@ module Kerbi
       process(hashes, only, except)
     end
 
+    def this_dir
+      self.class.get_location
+    end
+
     class << self
       def locate_self(val)
         @dir_location = val
@@ -96,6 +86,32 @@ module Kerbi
       def get_location
         @dir_location
       end
+    end
+
+    private
+
+    def safe_gen(&block)
+      bucket = Kerbi::Bucket.new(self)
+      block.call(bucket)
+      bucket.output.flatten
+    end
+
+    ##
+    # @param[Hash, #hash] contents asd
+    def res_id(hash)
+      kind = hash[:kind]
+      name = hash[:metadata]&.[](:name)
+      kind && name ? "#{kind}:#{name}" : ''
+    end
+
+    def filter_res_only(hashes, rules)
+      return hashes if rules.compact.empty?
+      hashes.select { |hash| rules.include?(res_id(hash)) }
+    end
+
+    def filter_res_except(hashes, rules)
+      return hashes if rules.compact.empty?
+      hashes.reject { |hash| rules.include?(res_id(hash)) }
     end
   end
 

@@ -37,6 +37,7 @@ GEM
     thread_safe (0.3.6)
     tzinfo (1.2.7)
       thread_safe (~> 0.1)
+    yard (0.9.25)
 
 PLATFORMS
   ruby
@@ -46,6 +47,7 @@ DEPENDENCIES
   pry (~> 0.12.2)
   rspec (~> 3.0)
   simplecov
+  yard
 
 RUBY VERSION
    ruby 2.6.3p62

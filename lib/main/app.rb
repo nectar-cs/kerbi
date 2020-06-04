@@ -3,13 +3,21 @@ require_relative 'val_man'
 
 module Kerbi
   class App
+    ##
+    # Optional reference to a helper
     attr_accessor :values_helper
+
+    ##
+    # Shat
     attr_accessor :generators
 
     def values
       ValMan.load(values_helper)
     end
 
+    ##
+    # It goes here
+    #
     def gen
       self.generators.inject([]) do |whole, gen_class|
         generator = gen_class.new(values)
