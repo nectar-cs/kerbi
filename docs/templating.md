@@ -114,6 +114,7 @@ Take the following project:
 The following generator loads the yaml files in `storage` and `machine-learning`:
 
 ```ruby
+#machine-learning/gen.rb
 module MachineLearning
   class Gen < Kerbi::Gen
     locate_self __dir__
@@ -128,16 +129,75 @@ module MachineLearning
 end
 ```
 
-When `in` is passed to to `yamls`, it searches that directors (starting with `.` indicates relative).
+When `in: <dir-name>` is passed to to `yamls`, it looks for `*.yaml` and `*.yaml.erb`
+files in `<dir-name>`. If `in: <dir-name>` is not passed, it looks in the current
+directory, according to `locate_self`.
 
-Otherwise the current dir, according to `locate_self`, is searched.
+
 
 ## Loading Hashes
 
-The most direct way of passing  
+The third option is to pass in actual Ruby hashes.   
 
+```ruby
+#foundation/gen.rb
+class FoundationsGen < Kerbi::Gen
+  locate_self __dir__
+  
+  def gen
+    super do |g|
+      values[:org][:developers].each do |developer|
+        g.hash self.template_namespace(developer)
+      end
+    end
+  end
 
-
+  def template_namespace(name)
+    {
+      kind: 'Namespace',
+      metadata: { name: name }
+    }
+  end
+end
+```
 
 
 ## Using Patches
+
+With a `patch_with` block, you can merge hashes onto the hashes being loaded
+in your block.
+
+A very simple example: 
+```ruby
+class TrivialPatchGen < Kerbi::Gen
+  def gen
+    super do |g|
+      g.hash foo: 'foo'
+      g.patched_with hash: {foo: 'you-got-patched'} do |gp|
+        gp.hash foo: 'bar', bar: 'bar'
+      end
+    end
+  end
+end
+```
+
+Kerbi would output 
+
+```yaml
+foo: bar
+---
+foo: you-got-patched
+bar: bar
+```
+
+The `patched_with` accepts different patch sources:
+
+| keyword  | expects                             |
+|----------|-------------------------------------|
+| hash     | single hash                         |
+| hashes   | array of hashes                     |
+| yamls    | array of yaml filenames             |
+| yamls_in | single name of dir containing yamls |
+
+`yamls` and `yamls_in` use the same filename resolution logic detailed above.
+
