@@ -1,7 +1,20 @@
-require 'spec_helper'
-require_relative './../lib/gen'
+require_relative './../spec_helper'
+require_relative './../../lib/main/gen'
 
 RSpec.describe Kerbi::Gen do
+
+  let(:root) { '/tmp/kerbi-yamls' }
+
+  def make_yaml(fname, contents)
+    File.open("#{root}/#{fname}", "w") do |f|
+      f.write(YAML.dump(contents))
+    end
+  end
+
+  before :each do
+    system "rm -rf #{root}"
+    system "mkdir #{root}"
+  end
 
   subject { Kerbi::Gen.new({}) }
 
@@ -12,6 +25,63 @@ RSpec.describe Kerbi::Gen do
         r.hash k2: 'v2'
       end
       expect(result).to eq([{k1: 'v1'}, {k2: 'v2'}])
+    end
+  end
+
+  describe '#patched_with' do
+    let(:patch) { {foo: 'baz', bar: {foo: 'bar'}} }
+    let(:res) { { bar: {foo: 'baz', bar: 'foo'} } }
+    let(:expected) { {foo: "baz", bar: {foo: "bar", bar: "foo"}} }
+
+    context 'with one hash' do
+      it 'outputs the correct hashes' do
+        actual = subject.safe_gen do |k|
+          k.patched_with(hash: patch) { |kp| kp.hash res }
+        end
+        expect(actual).to eq([expected])
+      end
+    end
+
+    context 'with many hashes' do
+      it 'outputs the correct hashes' do
+        actual = subject.safe_gen do |k|
+          k.patched_with hashes: [{x: 'x'}] do |kp|
+            kp.hash x: 'y'
+          end
+        end
+        expect(actual).to eq([{x: 'x'}])
+      end
+    end
+
+    context 'with_relative_path' do
+      it 'returns the expected hashes' do
+        allow(subject.class).to receive(:get_location).and_return(root)
+        make_yaml('a.yaml', x: 'x')
+
+        actual = subject.safe_gen do |k|
+          k.patched_with yamls_in: './../kerbi-yamls' do |kp|
+            kp.hash x: 'x1'
+            kp.hash x: 'x2', z: 'z'
+          end
+        end
+        expect(actual).to match_array([{x: 'x'}, {x: 'x', z: 'z'}])
+      end
+    end
+  end
+
+  describe '#yamls' do
+    before :each do
+      make_yaml('a.yaml', a_foo: 'bar')
+      make_yaml('b.yaml', b_foo: 'baz')
+      make_yaml('c.yaml.erb', c_foo: 'zab')
+    end
+
+    it 'outputs the correct hashes' do
+      actual = subject.safe_gen do |k|
+        k.yamls in: root, except: 'b.yaml'
+      end
+      expected = [{a_foo: 'bar'}, {c_foo: 'zab'}]
+      expect(actual).to match_array(expected)
     end
   end
 
@@ -71,17 +141,22 @@ RSpec.describe Kerbi::Gen do
   end
 
   describe "#resolve_file_name" do
+    before :each do
+      allow(subject.class).to receive(:get_location).and_return(root)
+    end
+
     context 'when fname is not a real file' do
       it 'returns the assumed fully qualified name' do
-        allow(subject.class).to receive(:get_location).and_return('/foo')
-        expect(subject.resolve_file_name('bar')).to eq('/foo/bar.yaml.erb')
+        expect(subject.resolve_file_name('bar')).to eq(nil)
       end
     end
 
     context 'when fname is a real file' do
       it 'returns the original fname'do
-        result = subject.resolve_file_name('/dev/null')
-        expect(result).to eq('/dev/null')
+        make_yaml('foo.yaml', {})
+        expected = "#{root}/foo.yaml"
+        expect(subject.resolve_file_name('foo')).to eq(expected)
+        expect(subject.resolve_file_name('foo.yaml')).to eq(expected)
       end
     end
   end

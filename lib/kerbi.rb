@@ -1,7 +1,0 @@
-require 'app'
-require 'gen'
-require 'val_man'
-require 'base_helper'
-require_relative './../lib/templates/env_var_template'
-require_relative './../lib/templates/service'
-require_relative './../lib/templates/deployment'

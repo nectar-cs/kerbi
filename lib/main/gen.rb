@@ -1,6 +1,8 @@
 require 'yaml'
+require 'active_support/core_ext/hash/deep_merge'
 require 'active_support/core_ext/hash/keys'
-require 'base_helper'
+require_relative './base_helper'
+require_relative './../utils/utils'
 
 module Kerbi
   class Gen
@@ -10,6 +12,10 @@ module Kerbi
 
     def initialize(values)
       @values = values
+    end
+
+    def this_dir
+      self.class.get_location
     end
 
     def safe_gen(&block)
@@ -39,9 +45,29 @@ module Kerbi
     end
 
     def resolve_file_name(fname)
-      return fname if File.exist?(fname)
       dir = self.class.get_location
-      "#{dir}/#{fname}.yaml.erb"
+      Kerbi::Utils.real_files_for(
+        fname,
+        "#{fname}.yaml",
+        "#{fname}.yaml.erb",
+        "#{dir}/#{fname}",
+        "#{dir}/#{fname}.yaml",
+        "#{dir}/#{fname}.yaml.erb"
+      ).first
+    end
+
+    def yamls_in_dir(dir=nil, blacklist=nil)
+      dir ||= this_dir
+      blacklist ||= []
+
+      dir = "#{this_dir}/#{dir}" if dir.start_with?(".")
+      yaml_files = Dir["#{dir}/*.yaml"]
+      erb_files = Dir["#{dir}/*.yaml.erb"]
+
+      (yaml_files + erb_files).map do |fname|
+        is_blacklisted = blacklist.include?(File.basename(fname))
+        inflate_yaml(fname) unless is_blacklisted
+      end.compact
     end
 
     def interpolate(fname, extras = {})
@@ -74,21 +100,42 @@ module Kerbi
   end
 
   class Bucket
-    attr_reader :output
-    attr_reader :parent
+    attr_accessor :output
+    attr_accessor :parent
 
     def initialize(parent)
       @parent = parent
       @output = []
     end
 
+    def patched_with(opts={}, &block)
+      bucket = Kerbi::Bucket.new(self.parent)
+      block.call(bucket)
+
+      hashes = opts[:hashes] || [opts[:hash]]
+      dir_patches = opts.has_key?(:yamls_in) && self.parent.yamls_in_dir(opts[:yamls_in])
+      file_patches = (opts[:yamls] || []).map { |f| parent.inflate_yaml(f) }
+      patches = (hashes + file_patches + (dir_patches || [])).flatten.compact
+
+      self.output = bucket.output.flatten.map do |res|
+        patches.inject(res) do |whole, patch|
+          whole.deep_merge(patch)
+        end
+      end
+    end
+
+    def yamls(options={})
+      dir, blacklist = options.slice(:in, :except).values
+      self.output += self.parent.yamls_in_dir(dir, [blacklist].compact)
+    end
+
     def yaml(*args)
-      output << parent.inflate_yaml(*args)
+      self.output << parent.inflate_yaml(*args)
     end
 
     def hash(hash, *args)
       hash = [hash] unless hash.is_a?(Array)
-      output << parent.process(hash, args[1], args[2])
+      self.output << parent.process(hash, args[1], args[2])
     end
 
     def method_missing(method, *args)

@@ -1,5 +1,5 @@
-require 'spec_helper'
-require_relative './../lib/base_helper'
+require_relative './../spec_helper'
+require_relative './../../lib/main/base_helper'
 
 RSpec.describe Kerbi::BaseHelper do
 

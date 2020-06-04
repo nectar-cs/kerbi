@@ -1,5 +1,5 @@
-require 'spec_helper'
-require_relative './../lib/templates/env_var_template'
+require_relative './../spec_helper'
+require_relative './../../lib/templates/env_var_template'
 
 RSpec.describe Kerbi::EnvVarTemplate do
 
