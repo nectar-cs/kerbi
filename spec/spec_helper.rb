@@ -22,10 +22,5 @@ def n_yaml_files(hashes:, more_args: [])
   subject.load
 end
 
-class Help
-  def help()'delivered' end
-  def get_binding() binding end
-end
-
 SimpleCov.start unless ENV['NO_COVERAGE']
 

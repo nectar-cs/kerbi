@@ -38,7 +38,7 @@ module Kerbi
     # @option opts [String] in absolute or relative path to the directory
     # @option opts [Array<String>] except list of filenames to avoid
     # @return [void]
-    def yamls(opts={})
+    def yamls(**opts)
       dir, blacklist = opts.slice(:in, :except).values
       self.output += self.parent.inflate_yamls_in_dir(dir, [blacklist].compact)
     end
@@ -53,7 +53,7 @@ module Kerbi
     # @option opts [Array<String>] yamls list of simplified/absolute filenames to apply as patches
     # @option opts [String] yamls_in dir name in which all yamls/erbs should be applied as hashes
     # @return [void]
-    def patched_with(opts={}, &block)
+    def patched_with(**opts, &block)
       bucket = self.class.new(self.parent)
       block.call(bucket)
 
@@ -79,12 +79,18 @@ module Kerbi
 
     ##
     # Adds a raw hash to the bucket
-    # @param [Array<Hash>] hash the hash or hashes the hash to be added
+    # @param [Hash] hash the hash to be added
+    def hash(hash)
+      self.output << parent.clean_and_filter_hashes([hash], nil, nil)
+    end
+
+    ##
+    # Adds a raw hash to the bucket
+    # @param [Array<Hash>] hashes the hashes the hash to be added
     # @param [Array<String>] only optional whitelist of k8s-ids
     # @param [Array<String>] except optional blacklist of k8s-ids
-    def hash(hash, only: nil, except: nil)
-      hash = [hash] unless hash.is_a?(Array)
-      self.output << parent.clean_and_filter_hashes(hash, only, except)
+    def hashes(hashes, only: nil, except: nil)
+      self.output << parent.clean_and_filter_hashes(hashes, only, except)
     end
 
     ##
