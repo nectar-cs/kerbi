@@ -58,8 +58,12 @@ module Kerbi
       block.call(bucket)
 
       hashes = opts[:hashes] || [opts[:hash]]
-      dir_patches = opts.has_key?(:yamls_in) && self.parent.inflate_yamls_in_dir(opts[:yamls_in])
-      file_patches = (opts[:yamls] || []).map { |f| parent.inflate_yaml_file(f) }
+      yamls_in = opts.has_key?(:yamls_in) && opts[:yamls_in]
+      #noinspection RubyYardParamTypeMatch
+      dir_patches = yamls_in && self.parent.inflate_yamls_in_dir(yamls_in)
+      file_patches = (opts[:yamls] || []).map do |f|
+        parent.inflate_yaml_file(f, nil, nil, {})
+      end
       patches = (hashes + file_patches + (dir_patches || [])).flatten.compact
 
       self.output = bucket.output.flatten.map do |res|
@@ -67,6 +71,10 @@ module Kerbi
           whole.deep_merge(patch)
         end
       end
+    end
+
+    def sibling(sibling_class, root=self.parent.values)
+      self.output += sibling_class.new(root).gen
     end
 
     ##
@@ -77,6 +85,17 @@ module Kerbi
     def hash(hash, only: nil, except: nil)
       hash = [hash] unless hash.is_a?(Array)
       self.output << parent.clean_and_filter_hashes(hash, only, except)
+    end
+
+    ##
+    # Adds the res-hashes from a YAML/ERB file in a github repo
+    # @param [String] id <org>/<repo>
+    # @param [String] file /path/to/file.extension
+    # @param [Array<String>] only optional whitelist of k8s-ids
+    # @param [Array<String>] except optional blacklist of k8s-ids
+    def github(id:, file:, only: nil, except: nil)
+      params = {from: 'github', id: id, file: file}
+      self.output << parent.inflate_yaml_http(params, only, except, {})
     end
 
     private

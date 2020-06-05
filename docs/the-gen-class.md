@@ -40,7 +40,7 @@ class GenOne < Kerbi::Gen
 end
 ```
 
-## Telling Kerbi about adjacent YAMLs
+## Pointing Kerbi to adjacent YAMLs
 
 You will most likely use your `Kerbi::Gen` subclasses to inflate
 yamls you have defined nearby. 
@@ -83,7 +83,7 @@ For this to work,
 **need to call** the class method `locate_self` in your subclass. 
 
 
-## Using a Values subtree
+## Limiting values to subtree
 
 It often makes sense to limit a particular `Kerbi::Gen` subclass's access to
 a particular subtree of the global values tree.
@@ -125,6 +125,8 @@ Below are common use cases:
 
 #### Convenient Accessors
 
+To keep ERB's clean, it can be useful to write anything more than a trivial 
+`values[:foo]` as a dedicated instance method:
 
 
 ```ruby
@@ -148,8 +150,6 @@ class PostgresGen < Kerbi::Gen
   end
 end
 ``` 
-
-
 
 
 

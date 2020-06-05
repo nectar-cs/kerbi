@@ -20,7 +20,7 @@ RSpec.describe Kerbi::Gen do
 
   describe "#gen2" do
     it 'works' do
-      result = subject.safe_gen do |r|
+      result = subject.gen do |r|
         r.yaml tmp_file(YAML.dump({ k1: 'v1' }))
         r.hash k2: 'v2'
       end
@@ -35,7 +35,7 @@ RSpec.describe Kerbi::Gen do
 
     context 'with one hash' do
       it 'outputs the correct hashes' do
-        actual = subject.safe_gen do |k|
+        actual = subject.gen do |k|
           k.patched_with(hash: patch) { |kp| kp.hash res }
         end
         expect(actual).to eq([expected])
@@ -44,7 +44,7 @@ RSpec.describe Kerbi::Gen do
 
     context 'with many hashes' do
       it 'outputs the correct hashes' do
-        actual = subject.safe_gen do |k|
+        actual = subject.gen do |k|
           k.patched_with hashes: [{x: 'x'}] do |kp|
             kp.hash x: 'y'
           end
@@ -58,7 +58,7 @@ RSpec.describe Kerbi::Gen do
         allow(subject.class).to receive(:class_pwd).and_return(root)
         make_yaml('a.yaml', x: 'x')
 
-        actual = subject.safe_gen do |k|
+        actual = subject.gen do |k|
           k.patched_with yamls_in: './../kerbi-yamls' do |kp|
             kp.hash x: 'x1'
             kp.hash x: 'x2', z: 'z'
@@ -77,7 +77,7 @@ RSpec.describe Kerbi::Gen do
     end
 
     it 'outputs the correct hashes' do
-      actual = subject.safe_gen do |k|
+      actual = subject.gen do |k|
         k.yamls in: root, except: 'b.yaml'
       end
       expected = [{a_foo: 'bar'}, {c_foo: 'zab'}]
@@ -97,15 +97,15 @@ RSpec.describe Kerbi::Gen do
   describe "#res_id" do
     context 'with bad hashes' do
       it 'returns an empty string' do
-        expect(subject.res_id({})).to eq('')
-        expect(subject.res_id({'kind': 'Volume'})).to eq('')
-        expect(subject.res_id({'kind': "Volume", metadata: {}})).to eq('')
+        expect(subject.simple_k8s_res_id({})).to eq('')
+        expect(subject.simple_k8s_res_id({'kind': 'Volume'})).to eq('')
+        expect(subject.simple_k8s_res_id({'kind': "Volume", metadata: {}})).to eq('')
       end
     end
 
     context 'with a proper Kubernetes res hash' do
       it "returns the resource's signature" do
-        expect(subject.res_id({
+        expect(subject.simple_k8s_res_id({
           kind: "Volume",
           metadata: { name: "foo" }
         })).to eq('Volume:foo')
@@ -121,9 +121,11 @@ RSpec.describe Kerbi::Gen do
 
     context 'without rules' do
       it 'returns the original input' do
+        #noinspection InvalidCallToProtectedPrivateMethod
         result = subject.filter_res_only(hashes, [nil])
         expect(result).to eq(hashes)
 
+        #noinspection InvalidCallToProtectedPrivateMethod
         result = subject.filter_res_except(hashes, [nil])
         expect(result).to eq(hashes)
       end
@@ -131,9 +133,11 @@ RSpec.describe Kerbi::Gen do
 
     context 'with rules' do
       it 'returns the ruled-in hash' do
+        #noinspection InvalidCallToProtectedPrivateMethod
         result = subject.filter_res_only(hashes, ['KindA:NameA'])
         expect(result).to eq([hashes[0]])
 
+        #noinspection InvalidCallToProtectedPrivateMethod
         result = subject.filter_res_except(hashes, ['KindA:NameA'])
         expect(result).to eq([hashes[1]])
       end

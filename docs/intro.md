@@ -1,54 +1,61 @@
 
 # Kerbi
 
-### What it is
 Kerbi (Kubernetes Emdedded Ruby Interpolator) is yet another templating engine for 
 generating Kubernetes resource manifests. 
 
-It enables the combined use of the three most popular templating strategies under one roof:
+It enables the mixed use of the three most popular templating strategies under one roof:
 - embedding values and code into YAML files (e.g [Helm](https://github.com/helm/helm))
-- patching and overlaying YAML files (e.g [kustomize](https://github.com/kubernetes-sigs/kustomize))
+- patching and overlaying YAML/objects (e.g [kustomize](https://github.com/kubernetes-sigs/kustomize))
 - serializing YAML from in-memory objects (e.g [jsonnet](https://github.com/google/jsonnet))
 
-Much like in the language it uses - Ruby - Kerbi is easy to use, and easy to abuse. 
-Kerbi is exclusively a Ruby gem, and cannot be used as a standalone executable.
-  
-### What it does
+Can mixing different strategies lead to abominable anti-patterns? Absolutely. But 
+Kerbi is a free spirited enabler who does not judge. 
 
-Generators make it easy to orchestrate complex (or complicated...) templating strategies:    
+### Features
+- Helm-like `value.yaml`, `-f special-values.yaml`, and inline assignments `--set foo.bar=baz`
+- Integrated environment logic à la Kustomize, i.e `-e production`
+- Freedom in directory structure and order of execution 
+- Seamless mixing of `yaml`, `yaml.erb`, remote files, `helm` templates, and in-memory objects  
+
+### Non-Features
+- Release management à la Helm, packaging, or any kind of manifest versioning
+- Talking to Kubernetes clusters, building images, etc... Kerbi only outputs yaml 
+
+### How it looks
+
+Kerbi lets you write programmatic generators to orchestrate complex (or silly) templating logic:    
 
 ```ruby
-class AuthBackendGen < Kerbi::Gen
+class BackendGen < Kerbi::Gen
   def gen
     super do |g|
       g.yamls in: './../storage'
-      g.yaml 'config-map' 
-      g.yaml 'app-secret'
-      g.yaml 'perms' if values[:rbac]
+      g.yaml 'app-secret' if self.values[:secret]
+      g.hash({kind: 'Deployment'})  #etc...
 
-      g.patched_with hashes: [labels], yamls: ['limits'] do |gp|
-        gp.hash build_daemonset
-        gp.yaml 'workloads'
+      g.patched_with yamls: ['annotations', 'limits'] do |gp|
+        gp.sibling ConfigMapGen
+        gp.helm id: 'org/repo', version: '1.2.3'        
+        gp.github id: 'org/repo', file: 'file.yaml.erb'
       end
     end
   end 
-
-  def labels
-    { metadata: { labels: { microservice: 'auth-backend'} } }
-  end
 end
 ```
 
-### Install
+Where YAML files may be static `.yaml` or ruby-embedded `.yaml.erb`, e.g: 
 
-Inside a new project's Gemfile:  
-
+```yaml
+#app-secret.yaml.erb
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: <%= namespace %>
+  name: backend-app
+data:
+  attr-enc-key: "<%= Base64.encode64(values[:secrets][:attr_enc]) %>"
 ```
-gem 'kerbi'
-```
-
-Then `bundle install`.
-
 
 ### How it works
 
@@ -64,16 +71,28 @@ a lot more, and b) there is no required directory structure.
 ```ruby
 class Main < Kerbi::Gen
   def gen
-    {}
+    super do |g|
+      g.hash foo: 'bar'
+      g.hash foo: 'baz'
+    end
   end 
 end
 
 kerbi.generators = [ Main ]
 puts kerbi.gen_yaml 
+# => foo: bar 
+# => ---
+# => foo: baz
 ```
 
-#### Why Ruby?
+### Install
 
-Ruby gets a lot of flak for being lawless and undebuggable. Rightly so. But if there's
-one thing Ruby does right, it's configuration DSLs.
+Inside a new project's Gemfile:  
+
+```
+gem 'kerbi'
+```
+
+Then `bundle install`.
+
 

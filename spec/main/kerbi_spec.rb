@@ -3,6 +3,6 @@ require_relative './../../lib/main/kerbi'
 
 RSpec.describe 'kirby' do
   it 'exports everything' do
-    expect(Kerbi::App)
+    expect(Kerbi::Engine)
   end
 end
