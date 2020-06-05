@@ -20,7 +20,7 @@ RSpec.describe Kerbi::Mixer do
 
   describe "#gen2" do
     it 'works' do
-      result = subject.evaluate do |r|
+      result = subject.run do |r|
         r.yaml tmp_file(YAML.dump({ k1: 'v1' }))
         r.hash k2: 'v2'
       end
@@ -35,7 +35,7 @@ RSpec.describe Kerbi::Mixer do
 
     context 'with one hash' do
       it 'outputs the correct hashes' do
-        actual = subject.evaluate do |k|
+        actual = subject.run do |k|
           k.patched_with(hash: patch) { |kp| kp.hash res }
         end
         expect(actual).to eq([expected])
@@ -44,7 +44,7 @@ RSpec.describe Kerbi::Mixer do
 
     context 'with many hashes' do
       it 'outputs the correct hashes' do
-        actual = subject.evaluate do |k|
+        actual = subject.run do |k|
           k.patched_with hashes: [{x: 'x'}] do |kp|
             kp.hash x: 'y'
           end
@@ -58,7 +58,7 @@ RSpec.describe Kerbi::Mixer do
         allow(subject.class).to receive(:class_pwd).and_return(root)
         make_yaml('a.yaml', x: 'x')
 
-        actual = subject.evaluate do |k|
+        actual = subject.run do |k|
           k.patched_with yamls_in: './../kerbi-yamls' do |kp|
             kp.hash x: 'x1'
             kp.hash x: 'x2', z: 'z'
@@ -77,7 +77,7 @@ RSpec.describe Kerbi::Mixer do
     end
 
     it 'outputs the correct hashes' do
-      actual = subject.evaluate do |k|
+      actual = subject.run do |k|
         k.yamls in: root, except: 'b.yaml'
       end
       expected = [{a_foo: 'bar'}, {c_foo: 'zab'}]
@@ -198,7 +198,7 @@ RSpec.describe Kerbi::Mixer do
 
   describe '#gen' do
     it 'raises unimplemented' do
-      expect{subject.evaluate}.to raise_exception("Unimplemented")
+      expect{subject.run}.to raise_exception("Unimplemented")
     end
   end
 

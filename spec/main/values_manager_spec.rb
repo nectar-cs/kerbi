@@ -1,9 +1,9 @@
 require_relative './../spec_helper'
-require_relative './../../lib/main/values_loader'
+require_relative './../../lib/main/values_manager'
 
-RSpec.describe Kerbi::ValuesLoader do
+RSpec.describe Kerbi::ValuesManager do
 
-  subject { Kerbi::ValuesLoader }
+  subject { Kerbi::ValuesManager }
 
   describe ".str_assign_to_h" do
     it "returns the right hash" do
@@ -110,25 +110,17 @@ RSpec.describe Kerbi::ValuesLoader do
 
   describe '.read_values_file' do
     context 'when the file exists' do
-      context 'with a helper' do
-        it 'correctly interpolates using the helper' do
-          path = tmp_file("foo: bar\nbaz: <%= help %>")
-          output = subject.read_values_file(path, Help.new)
-          expect(output[:baz]).to eq('delivered')
-        end
-      end
-
       context 'without a helper' do
         it 'correctly loads the yaml' do
           path = tmp_file("foo: bar\nbaz: bar2")
-          output = subject.read_values_file(path, Help.new)
+          output = subject.read_values_file(path)
           expect(output).to eq({foo: 'bar', baz: 'bar2'})
         end
       end
     end
     context 'when the file does not exist' do
       it 'returns an empty hash' do
-        output = subject.read_values_file('/bad-path', Help.new)
+        output = subject.read_values_file('/bad-path')
         expect(output).to eq({})
       end
     end
@@ -143,8 +135,7 @@ RSpec.describe Kerbi::ValuesLoader do
             { b: { b: 2, c: 3 } },
             { x: 'y1' }
           ],
-          more_args: %W[--set x:y2],
-          helper: nil
+          more_args: %W[--set x=y2]
         )
         expect(result).to eq(a: 1, b: { b: 2, c: 3 }, x: 'y2')
       end
@@ -162,28 +153,10 @@ RSpec.describe Kerbi::ValuesLoader do
             {},
             { b: { b: 2, c: 3 } },
             {},
-          ],
-          helper: nil
+          ]
         )
         expect(result).to eq({a: 1, b: { b: 2, c: 3 }})
       end
     end
-
-    describe "helping" do
-      it 'gets the correct helper values' do
-        result = two_yaml_files(
-          { k1: "<%= v1 %>" },
-          { k2: "<%= v2 %>" },
-          helper: Helper2.new
-        )
-        expect(result).to eq({k1: 'v1', k2: 'v2'})
-      end
-    end
   end
-end
-
-class Helper2
-  def v1() 'v1' end
-  def v2() 'v2' end
-  def get_binding() binding end
 end

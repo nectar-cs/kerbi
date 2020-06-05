@@ -1,9 +1,10 @@
 require 'active_support/core_ext/hash/keys'
+require 'active_support/core_ext/hash/deep_merge'
 require 'yaml'
 require 'erb'
 
 module Kerbi
-  class ValuesLoader
+  class ValuesManager
     class << self
       def str_assign_to_h(str_assign)
         key_expr, value = str_assign.split("=")
@@ -44,6 +45,7 @@ module Kerbi
         ].compact
       end
 
+      #noinspection RubyResolve
       def read_values_file(fname)
         file_cont = File.read(fname) rescue nil
         return {} unless file_cont

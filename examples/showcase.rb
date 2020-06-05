@@ -1,7 +1,7 @@
 require 'kerbi'
 
 class Main < Kerbi::Mixer
-  def evaluate
+  def run
     safe_gen do |k|
       k.yaml 'ingress'
       k.yamls './common-resources-dir'

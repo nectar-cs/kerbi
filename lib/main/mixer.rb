@@ -1,13 +1,13 @@
 require 'yaml'
 require 'active_support/core_ext/hash/deep_merge'
 require 'active_support/core_ext/hash/keys'
-require_relative './base_helper'
+require_relative './xer_helper'
 require_relative './../utils/utils'
 require_relative './res_bucket'
 
 module Kerbi
   class Mixer
-    include Kerbi::BaseHelper
+    include Kerbi::MixerHelper
 
     ##
     # Values hash available to subclasses
@@ -28,7 +28,7 @@ module Kerbi
     # @yieldparam [Kerbi::ResBucket] g Bucket object with essential methods
     # @yieldreturn [Array<Hash>] array of hashes representing Kubernetes resources
     # @return [Array<Hash>] array of hashes representing Kubernetes resources
-    def evaluate(&block)
+    def run(&block)
       if block_given?
         bucket = Kerbi::ResBucket.new(self)
         block.call(bucket)

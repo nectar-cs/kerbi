@@ -74,7 +74,7 @@ module Kerbi
     end
 
     def sibling(sibling_class, root=self.parent.values)
-      self.output += sibling_class.new(root).evaluate
+      self.output += sibling_class.new(root).run
     end
 
     ##

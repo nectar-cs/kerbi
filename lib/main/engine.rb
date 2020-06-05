@@ -1,5 +1,5 @@
 require "base64"
-require_relative 'values_loader'
+require_relative 'values_manager'
 
 module Kerbi
   ##
@@ -14,7 +14,7 @@ module Kerbi
     # Memoized values loaded by ValuesLoader
     # @return [SymbolHash] values tree to be passed to generators
     def values
-      @_values ||= ValuesLoader.load
+      @_values ||= ValuesManager.load
     end
 
     ##
@@ -32,7 +32,7 @@ module Kerbi
     def gen
       self.generators.inject([]) do |whole, gen_class|
         generator = gen_class.new(values)
-        whole + generator.evaluate.flatten
+        whole + generator.run.flatten
       end
     end
   end
