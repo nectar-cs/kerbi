@@ -18,7 +18,7 @@ Kerbi is exclusively a Ruby gem, and cannot be used as a standalone executable.
 Generators make it easy to orchestrate complex (or complicated...) templating strategies:    
 
 ```ruby
-class AuthBackendGen < Kerbi::Gen
+class AuthBackendGen < Kerbi::Mixer
   def gen
     super do |g|
       g.yamls in: './../storage'
@@ -62,7 +62,7 @@ a lot more, and b) there is no required directory structure.
 
 
 ```ruby
-class Main < Kerbi::Gen
+class Main < Kerbi::Mixer
   def gen
     {}
   end 

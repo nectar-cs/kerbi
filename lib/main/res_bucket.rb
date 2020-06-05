@@ -8,12 +8,12 @@ module Kerbi
 
     ##
     # Reference to the generator that owns this bucket
-    # @return [Kerbi::Gen] reference to the generator that owns this bucket
+    # @return [Kerbi::Mixer] reference to the generator that owns this bucket
     attr_accessor :parent
 
     ##
     # Constructor
-    # @param [Kerbi::Gen] parent the Kerbi::Gen that owns this bucket
+    # @param [Kerbi::Mixer] parent the Kerbi::Mixer that owns this bucket
     def initialize(parent)
       @parent = parent
       @output = []
@@ -74,7 +74,7 @@ module Kerbi
     end
 
     def sibling(sibling_class, root=self.parent.values)
-      self.output += sibling_class.new(root).gen
+      self.output += sibling_class.new(root).evaluate
     end
 
     ##

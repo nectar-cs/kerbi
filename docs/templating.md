@@ -8,14 +8,14 @@ leverage multiple methods, check out the examples directory.
 
 ## The gen method
 
-The `Kerbi::Gen#gen` method is where it all happens. Kerbi translates the 
+The `Kerbi::Mixer#gen` method is where it all happens. Kerbi translates the 
 method's return value into yaml.
 
 **The way you should** use `gen` is to pass it a block and make
 calls to the builder it passes. 
 
 ```ruby
-class GenWithSuperDo < Kerbi::Gen
+class MixerWithSuperDo < Kerbi::Mixer
   def gen
     super do |g|
       g.hash foo: 'bar'
@@ -71,7 +71,7 @@ roleRef:
 Our generator would look like:
 
 ```ruby
-class RbacGen < Kerbi::Gen
+class RbacGen < Kerbi::Mixer
   locate_self __dir__
   
   def gen
@@ -116,7 +116,7 @@ The following generator loads the yaml files in `storage` and `machine-learning`
 ```ruby
 #machine-learning/gen.rb
 module MachineLearning
-  class Gen < Kerbi::Gen
+  class Mixer < Kerbi::Mixer
     locate_self __dir__
   
     def gen
@@ -141,7 +141,7 @@ The third option is to pass in actual Ruby hashes.
 
 ```ruby
 #foundation/gen.rb
-class FoundationsGen < Kerbi::Gen
+class FoundationsGen < Kerbi::Mixer
   locate_self __dir__
   
   def gen
@@ -169,7 +169,7 @@ in your block.
 
 A very simple example: 
 ```ruby
-class TrivialPatchGen < Kerbi::Gen
+class TrivialPatchGen < Kerbi::Mixer
   def gen
     super do |g|
       g.hash foo: 'foo'

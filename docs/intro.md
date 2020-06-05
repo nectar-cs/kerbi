@@ -20,24 +20,24 @@ Kerbi is a free spirited enabler who does not judge.
 
 ### Non-Features
 - Release management à la Helm, packaging, or any kind of manifest versioning
-- Talking to Kubernetes clusters, building images, etc... Kerbi only outputs yaml 
+- Interfacing with Kubernetes clusters, building images, etc... Kerbi only outputs yaml 
 
 ### How it looks
 
 Kerbi lets you write programmatic generators to orchestrate complex (or silly) templating logic:    
 
 ```ruby
-class BackendGen < Kerbi::Gen
-  def gen
+class BackendGen < Kerbi::Mixer
+  def evaluate
     super do |g|
       g.yamls in: './../storage'
       g.yaml 'app-secret' if self.values[:secret]
       g.hash({kind: 'Deployment'})  #etc...
 
       g.patched_with yamls: ['annotations', 'limits'] do |gp|
-        gp.sibling ConfigMapGen
+        gp.sibling ConfigMapMixer
         gp.helm id: 'org/repo', version: '1.2.3'        
-        gp.github id: 'org/repo', file: 'file.yaml.erb'
+        gp.github id: 'my-org/k8s', file: 'other.yaml.erb'
       end
     end
   end 
@@ -69,7 +69,7 @@ a lot more, and b) there is no required directory structure.
 
 
 ```ruby
-class Main < Kerbi::Gen
+class Main < Kerbi::Mixer
   def gen
     super do |g|
       g.hash foo: 'bar'

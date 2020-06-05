@@ -6,7 +6,7 @@ require_relative './../utils/utils'
 require_relative './res_bucket'
 
 module Kerbi
-  class Gen
+  class Mixer
     include Kerbi::BaseHelper
 
     ##
@@ -28,7 +28,7 @@ module Kerbi
     # @yieldparam [Kerbi::ResBucket] g Bucket object with essential methods
     # @yieldreturn [Array<Hash>] array of hashes representing Kubernetes resources
     # @return [Array<Hash>] array of hashes representing Kubernetes resources
-    def gen(&block)
+    def evaluate(&block)
       if block_given?
         bucket = Kerbi::ResBucket.new(self)
         block.call(bucket)

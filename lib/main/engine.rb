@@ -7,7 +7,7 @@ module Kerbi
   class Engine
     ##
     # List of generators to produce hash-resources for YAMLification
-    # @return [Array<Kerbi::Gen>] array of generators
+    # @return [Array<Kerbi::Mixer>] array of generators
     attr_accessor :generators
 
     ##
@@ -32,7 +32,7 @@ module Kerbi
     def gen
       self.generators.inject([]) do |whole, gen_class|
         generator = gen_class.new(values)
-        whole + generator.gen.flatten
+        whole + generator.evaluate.flatten
       end
     end
   end

@@ -20,7 +20,7 @@ At this point we can make sure everything works by creating our first generator 
 ```ruby
 require 'kerbi'
 
-class OurFirstGen < Kerbi::Gen
+class OurFirstGen < Kerbi::Mixer
   def gen
     { foo: values[:foo] }
   end

@@ -1,7 +1,7 @@
 require_relative './../spec_helper'
 require_relative './../../lib/main/gen'
 
-RSpec.describe Kerbi::Gen do
+RSpec.describe Kerbi::Mixer do
 
   let(:root) { '/tmp/kerbi-yamls' }
 
@@ -16,11 +16,11 @@ RSpec.describe Kerbi::Gen do
     system "mkdir #{root}"
   end
 
-  subject { Kerbi::Gen.new({}) }
+  subject { Kerbi::Mixer.new({}) }
 
   describe "#gen2" do
     it 'works' do
-      result = subject.gen do |r|
+      result = subject.evaluate do |r|
         r.yaml tmp_file(YAML.dump({ k1: 'v1' }))
         r.hash k2: 'v2'
       end
@@ -35,7 +35,7 @@ RSpec.describe Kerbi::Gen do
 
     context 'with one hash' do
       it 'outputs the correct hashes' do
-        actual = subject.gen do |k|
+        actual = subject.evaluate do |k|
           k.patched_with(hash: patch) { |kp| kp.hash res }
         end
         expect(actual).to eq([expected])
@@ -44,7 +44,7 @@ RSpec.describe Kerbi::Gen do
 
     context 'with many hashes' do
       it 'outputs the correct hashes' do
-        actual = subject.gen do |k|
+        actual = subject.evaluate do |k|
           k.patched_with hashes: [{x: 'x'}] do |kp|
             kp.hash x: 'y'
           end
@@ -58,7 +58,7 @@ RSpec.describe Kerbi::Gen do
         allow(subject.class).to receive(:class_pwd).and_return(root)
         make_yaml('a.yaml', x: 'x')
 
-        actual = subject.gen do |k|
+        actual = subject.evaluate do |k|
           k.patched_with yamls_in: './../kerbi-yamls' do |kp|
             kp.hash x: 'x1'
             kp.hash x: 'x2', z: 'z'
@@ -77,7 +77,7 @@ RSpec.describe Kerbi::Gen do
     end
 
     it 'outputs the correct hashes' do
-      actual = subject.gen do |k|
+      actual = subject.evaluate do |k|
         k.yamls in: root, except: 'b.yaml'
       end
       expected = [{a_foo: 'bar'}, {c_foo: 'zab'}]
@@ -87,7 +87,7 @@ RSpec.describe Kerbi::Gen do
 
   describe ".locate_self" do
     it "stores and later outputs the value" do
-      class Subclass < Kerbi::Gen
+      class Subclass < Kerbi::Mixer
         locate_self 'foo'
       end
       expect(Subclass.new({}).class.class_pwd).to eq('foo')
@@ -182,14 +182,14 @@ RSpec.describe Kerbi::Gen do
     end
 
     context 'with bindings' do
-      subject { Kerbi::Gen.new({x: 'y'}) }
+      subject { Kerbi::Mixer.new({x: 'y'}) }
       it 'reads the values hash' do
         f = tmp_file("k1: <%= values[:x] %>")
         expect(subject.load_yaml_file(f)).to eq("k1: y")
       end
 
       it 'reads regular instance methods' do
-        class Kerbi::Gen; def xx() 'yy' end; end
+        class Kerbi::Mixer; def xx() 'yy' end; end
         f = tmp_file("k1: <%= xx %>")
         expect(subject.load_yaml_file(f)).to eq("k1: yy")
       end
@@ -198,12 +198,12 @@ RSpec.describe Kerbi::Gen do
 
   describe '#gen' do
     it 'raises unimplemented' do
-      expect{subject.gen}.to raise_exception("Unimplemented")
+      expect{subject.evaluate}.to raise_exception("Unimplemented")
     end
   end
 
   describe "#inflate_yaml" do
-    class Kerbi::Gen;
+    class Kerbi::Mixer;
       def kind_a() 'KindA' end
       def kind_b() 'KindB' end
     end

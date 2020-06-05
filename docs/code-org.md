@@ -30,7 +30,7 @@ The most obvious and common pattern found across existing tools.
 Individual gens must use relative paths to reach reference antecedent directories:
 ```ruby
 #microservices/backend/gen.rb
-class Microservice::BackendGen < Kerbi::Gen
+class Microservice::BackendGen < Kerbi::Mixer
   locate_self __dir__
   
   def gen
