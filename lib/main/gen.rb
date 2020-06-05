@@ -3,17 +3,20 @@ require 'active_support/core_ext/hash/deep_merge'
 require 'active_support/core_ext/hash/keys'
 require_relative './base_helper'
 require_relative './../utils/utils'
+require_relative './bucket'
 
 module Kerbi
   class Gen
     include Kerbi::BaseHelper
 
+    ##
+    # Values hash available to subclasses
+    # @return [Hash] symbol-keyed hash
     attr_reader :values
 
-    # Initializes with a Gen
-    #
-    # @param [Hash, #read] contents the contents to reverse
-    # @return [String] the contents reversed lexically
+    ##
+    # Constructor
+    # @param [Hash] values the values tree that will be accessible to the subclass
     def initialize(values)
       @values = values
     end
@@ -21,17 +24,22 @@ module Kerbi
     ##
     # Where users should return a hash or
     # an array of hashes representing Kubernetes resources
-    #
     # @yield [bucket] Description of block
-    # @return [[Hash]] array of hashes representing Kubernetes resources
+    # @return [Array<Hash>] array of hashes representing Kubernetes resources
     def gen(&block)
       if block_given?
-        safe_gen(&block)
+        bucket = Kerbi::ResBucket.new(self)
+        block.call(bucket)
+        bucket.output.flatten
       end
     end
 
+    ##
+    # Coerces filename of unknown format to an absolute path
+    # @param [String, fname] fname simplified or absolute path of file
+    # @return [String] a variation of the filename that exists
     def resolve_file_name(fname)
-      dir = self.class.get_location
+      dir = self.class.class_pwd
       Kerbi::Utils.real_files_for(
         fname,
         "#{fname}.yaml",
@@ -42,62 +50,89 @@ module Kerbi
       ).first
     end
 
-    def yamls_in_dir(dir=nil, blacklist=nil)
-      dir ||= this_dir
+    ##
+    # Finds all .yaml and .yaml.erb files in a directory
+    # @param [String, dir] dir relative or absolute path of the directory
+    # @param [Array<String>], blacklist] blacklist list of filenames to avoid
+    # @return [Array<Hash>] array of processed hashes
+    def inflate_yamls_in_dir(dir=nil, blacklist=nil)
+      dir ||= pwd
       blacklist ||= []
 
-      dir = "#{this_dir}/#{dir}" if dir.start_with?(".")
+      dir = "#{pwd}/#{dir}" if dir.start_with?(".")
       yaml_files = Dir["#{dir}/*.yaml"]
       erb_files = Dir["#{dir}/*.yaml.erb"]
 
       (yaml_files + erb_files).map do |fname|
         is_blacklisted = blacklist.include?(File.basename(fname))
-        inflate_yaml(fname) unless is_blacklisted
-      end.compact
+        inflate_yaml_file(fname) unless is_blacklisted
+      end.compact.flatten
     end
 
-    def interpolate(fname, extras = {})
+    ##
+    # Inflates a yaml/erb file into a Hash
+    # @param [String, fname] fname simplified or absolute name of file
+    # @param [Hash, extras] extras an additional hash available to ERB
+    # @return [[Hash]] array of inflated hashes
+    def load_yaml_file(fname, extras = {})
       file = File.read(resolve_file_name(fname))
       binding.local_variable_set(:extras, extras)
       ERB.new(file).result(binding)
     end
 
-    def process(hashes, only, except)
+    ##
+    # Turns hashes into symbol-keyed hashes,
+    # and applies white/blacklisting based on filters supplied
+    # @param [Array<Hash>] hashes list of inflated hashes
+    # @param [Array<Hash>] whitelist list of k8s res IDs to whitelist
+    # @param [Array<Hash>] blacklist list of k8s res IDs to blacklist
+    # @return [Array<Hash>] list of clean and filtered hashes
+    def clean_and_filter_hashes(hashes, whitelist, blacklist)
       hashes = hashes.map(&:deep_symbolize_keys)
-      hashes = filter_res_only(hashes, Array(only))
-      filter_res_except(hashes, Array(except))
+      hashes = filter_res_only(hashes, Array(whitelist))
+      filter_res_except(hashes, Array(blacklist))
     end
 
-    def inflate_yaml(fname, extras: {}, only: nil, except: nil)
-      interpolated_yaml = interpolate(fname, extras)
+    ##
+    # End-to-end loading and processing of a YAML/ERB file
+    # @param [String] fname simplified or absolute path of file
+    # @param [Hash] extras an additional hash available in the ERB context
+    # @param [Array<Hash>] only list of k8s res IDs to whitelist
+    # @param [Array<Hash>] except list of k8s res IDs to blacklist
+    # @return [Array<Hash>] the hashes loaded from the YAML/ERB
+    def inflate_yaml_file(fname, extras: {}, only: nil, except: nil)
+      interpolated_yaml = load_yaml_file(fname, extras)
       hashes = YAML.load_stream(interpolated_yaml)
-      process(hashes, only, except)
+      clean_and_filter_hashes(hashes, only, except)
     end
 
-    def this_dir
-      self.class.get_location
+    ##
+    # Convenience instance method for accessing class level pwd
+    # @return [String] the subclass' pwd as defined by the user
+    def pwd
+      self.class.class_pwd
     end
 
     class << self
-      def locate_self(val)
-        @dir_location = val
+      ##
+      # Sets the absolute path of the directory where
+      # yamls used by this Gen can be found, usually "__dir__"
+      # @param [String] dirname absolute path of the directory
+      # @return [void]
+      def locate_self(dirname)
+        @dir_location = dirname
       end
 
-      def get_location
+      ##
+      # Returns the value set by locate_self
+      # @return [String] the subclass' pwd as defined by the user
+      def class_pwd
         @dir_location
       end
     end
 
     private
 
-    def safe_gen(&block)
-      bucket = Kerbi::Bucket.new(self)
-      block.call(bucket)
-      bucket.output.flatten
-    end
-
-    ##
-    # @param[Hash, #hash] contents asd
     def res_id(hash)
       kind = hash[:kind]
       name = hash[:metadata]&.[](:name)
@@ -115,48 +150,4 @@ module Kerbi
     end
   end
 
-  class Bucket
-    attr_accessor :output
-    attr_accessor :parent
-
-    def initialize(parent)
-      @parent = parent
-      @output = []
-    end
-
-    def patched_with(opts={}, &block)
-      bucket = Kerbi::Bucket.new(self.parent)
-      block.call(bucket)
-
-      hashes = opts[:hashes] || [opts[:hash]]
-      dir_patches = opts.has_key?(:yamls_in) && self.parent.yamls_in_dir(opts[:yamls_in])
-      file_patches = (opts[:yamls] || []).map { |f| parent.inflate_yaml(f) }
-      patches = (hashes + file_patches + (dir_patches || [])).flatten.compact
-
-      self.output = bucket.output.flatten.map do |res|
-        patches.inject(res) do |whole, patch|
-          whole.deep_merge(patch)
-        end
-      end
-    end
-
-    def yamls(options={})
-      dir, blacklist = options.slice(:in, :except).values
-      self.output += self.parent.yamls_in_dir(dir, [blacklist].compact)
-    end
-
-    def yaml(*args)
-      self.output << parent.inflate_yaml(*args)
-    end
-
-    def hash(hash, *args)
-      hash = [hash] unless hash.is_a?(Array)
-      self.output << parent.process(hash, args[1], args[2])
-    end
-
-    def method_missing(method, *args)
-      parent.send(method, *args) if parent.respond_to?(method)
-      super
-    end
-  end
 end

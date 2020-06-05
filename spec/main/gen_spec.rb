@@ -55,7 +55,7 @@ RSpec.describe Kerbi::Gen do
 
     context 'with_relative_path' do
       it 'returns the expected hashes' do
-        allow(subject.class).to receive(:get_location).and_return(root)
+        allow(subject.class).to receive(:class_pwd).and_return(root)
         make_yaml('a.yaml', x: 'x')
 
         actual = subject.safe_gen do |k|
@@ -90,7 +90,7 @@ RSpec.describe Kerbi::Gen do
       class Subclass < Kerbi::Gen
         locate_self 'foo'
       end
-      expect(Subclass.new({}).class.get_location).to eq('foo')
+      expect(Subclass.new({}).class.class_pwd).to eq('foo')
     end
   end
 
@@ -142,7 +142,7 @@ RSpec.describe Kerbi::Gen do
 
   describe "#resolve_file_name" do
     before :each do
-      allow(subject.class).to receive(:get_location).and_return(root)
+      allow(subject.class).to receive(:class_pwd).and_return(root)
     end
 
     context 'when fname is not a real file' do
@@ -165,14 +165,14 @@ RSpec.describe Kerbi::Gen do
     context 'without extras or a binding' do
       it 'returns the interpolated yaml as a hash' do
         f = tmp_file(YAML.dump({ k1: 'v1' }))
-        expect(subject.interpolate(f, {})).to eq("---\n:k1: v1\n")
+        expect(subject.load_yaml_file(f, {})).to eq("---\n:k1: v1\n")
       end
     end
 
     context 'with extras' do
       it 'reads the extras in the extras hash' do
         f = tmp_file("k1: <%=extras[:v1]%>")
-        result = subject.interpolate(f, {v1: 'foo'})
+        result = subject.load_yaml_file(f, {v1: 'foo'})
         expect(result).to eq("k1: foo")
       end
     end
@@ -181,13 +181,13 @@ RSpec.describe Kerbi::Gen do
       subject { Kerbi::Gen.new({x: 'y'}) }
       it 'reads the values hash' do
         f = tmp_file("k1: <%= values[:x] %>")
-        expect(subject.interpolate(f)).to eq("k1: y")
+        expect(subject.load_yaml_file(f)).to eq("k1: y")
       end
 
       it 'reads regular instance methods' do
         class Kerbi::Gen; def xx() 'yy' end; end
         f = tmp_file("k1: <%= xx %>")
-        expect(subject.interpolate(f)).to eq("k1: yy")
+        expect(subject.load_yaml_file(f)).to eq("k1: yy")
       end
     end
   end
@@ -221,21 +221,21 @@ RSpec.describe Kerbi::Gen do
 
     context 'without filters' do
       it 'performs correctly' do
-        result = subject.inflate_yaml(f)
+        result = subject.inflate_yaml_file(f)
         expect(result).to eq(full_hashes)
       end
     end
 
     context 'with only filter' do
       it 'performs correctly' do
-        result = subject.inflate_yaml(f, only: "KindA:A")
+        result = subject.inflate_yaml_file(f, only: "KindA:A")
         expect(result).to eq([full_hashes[0]])
       end
     end
 
     context 'with only filter' do
       it 'performs correctly' do
-        result = subject.inflate_yaml(f, except: "KindB:B")
+        result = subject.inflate_yaml_file(f, except: "KindB:B")
         expect(result).to eq([full_hashes[0], full_hashes[2]])
       end
     end

@@ -12,7 +12,7 @@ module Kerbi
     attr_accessor :generators
 
     def values
-      ValMan.load(values_helper)
+      @_values ||= ValuesLoader.load
     end
 
     ##

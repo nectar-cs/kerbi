@@ -1,13 +1,13 @@
 require_relative './../spec_helper'
-require_relative './../../lib/main/val_man'
+require_relative './../../lib/main/values_loader'
 
-RSpec.describe Kerbi::ValMan do
+RSpec.describe Kerbi::ValuesLoader do
 
-  subject { Kerbi::ValMan }
+  subject { Kerbi::ValuesLoader }
 
   describe ".str_assign_to_h" do
     it "returns the right hash" do
-      result = subject.str_assign_to_h("foo.bar:baz")
+      result = subject.str_assign_to_h("foo.bar=baz")
       expect(result).to eq({foo: {bar: 'baz'}})
     end
   end
@@ -16,14 +16,14 @@ RSpec.describe Kerbi::ValMan do
     context "when --set flags are passed" do
       context "without nil conflicts" do
         it "returns a merged hash" do
-          ARGV.replace %w[--set foo:bar --set x:y]
+          ARGV.replace %w[--set foo=bar --set x=y]
           actual = subject.read_arg_assignments
           expect(actual).to eq(foo: 'bar', x: 'y')
         end
       end
       context "with nil conflicts" do
         it "returns a merged hash" do
-          ARGV.replace %w[--set foo.bar:bar --set foo.baz:baz]
+          ARGV.replace %w[--set foo.bar=bar --set foo.baz=baz]
           actual = subject.read_arg_assignments
           expected = { foo: { bar: 'bar', baz: 'baz' } }
           expect(actual).to eq(expected)
@@ -94,14 +94,14 @@ RSpec.describe Kerbi::ValMan do
 
     context 'with an env only' do
       it 'returns the env value' do
-        ENV['NECTAR_K8S_ENV'] = 'foo'
+        ENV['KERBI_ENV'] = 'foo'
         expect(subject.run_env).to eq('foo')
       end
     end
 
     context 'with env and CLI args' do
       it 'gives precedence to the cli arg' do
-        ENV['NECTAR_K8S_ENV'] = 'foo'
+        ENV['KERBI_ENV'] = 'foo'
         ARGV.replace %w[-e bar]
         expect(subject.run_env).to eq('bar')
       end

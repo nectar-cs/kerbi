@@ -1,7 +1,7 @@
-require_relative 'res_template'
+require_relative 'base'
 
 module Kerbi
-  class ServiceTemplate < Kerbi::ResTemplate
+  class ServiceTemplate < Kerbi::Base
     class << self
 
       def port(port_obj)

@@ -3,10 +3,10 @@ require 'yaml'
 require 'erb'
 
 module Kerbi
-  class ValMan
+  class ValuesLoader
     class << self
       def str_assign_to_h(str_assign)
-        key_expr, value = str_assign.split(":")
+        key_expr, value = str_assign.split("=")
         assign_parts = key_expr.split(".") << value
         assignment = assign_parts.reverse.inject{ |a,n| { n=>a } }
         assignment.deep_symbolize_keys
@@ -22,7 +22,7 @@ module Kerbi
       end
 
       def run_env
-        arg_value('-e') || ENV['NECTAR_K8S_ENV'] || 'development'
+        arg_value('-e') || ENV['KERBI_ENV'] || 'development'
       end
 
       def values_paths(fname)
@@ -44,10 +44,9 @@ module Kerbi
         ].compact
       end
 
-      def read_values_file(fname, helper)
+      def read_values_file(fname)
         file_cont = File.read(fname) rescue nil
         return {} unless file_cont
-        file_cont = ERB.new(file_cont).result(helper.get_binding) if helper
         YAML.load(file_cont).deep_symbolize_keys
       end
 
@@ -59,10 +58,10 @@ module Kerbi
         end
       end
 
-      def load(helper)
+      def load
         result = all_values_paths.inject({}) do |whole, file_name|
           whole.
-            deep_merge(read_values_file(file_name, helper)).
+            deep_merge(read_values_file(file_name)).
             deep_merge(read_arg_assignments)
         end
         result.deep_symbolize_keys
