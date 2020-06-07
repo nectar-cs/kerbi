@@ -13,14 +13,14 @@ Can mixing different strategies lead to abominable anti-patterns? Absolutely. Bu
 Kerbi is a free spirited enabler who does not judge. 
 
 ### Features
+- Seamless mixing of `yaml`, `yaml.erb`, remote files, `helm` charts, and in-memory objects
 - Helm-like `value.yaml`, `-f special-values.yaml`, and inline assignments `--set foo.bar=baz`
 - Integrated environment logic à la Kustomize, i.e `-e production`
-- Freedom in directory structure and order of execution 
-- Seamless mixing of `yaml`, `yaml.erb`, remote files, `helm` templates, and in-memory objects  
+- Total freedom in project directory structure 
 
 ### Non-Features
 - Release management à la Helm, packaging, or any kind of manifest versioning
-- Interfacing with Kubernetes clusters, building images, etc... Kerbi only outputs yaml 
+- Interfacing with Kubernetes clusters, building images, syncing, etc... Kerbi just outputs yaml 
 
 ### How it looks
 
@@ -34,13 +34,9 @@ class BackendGen < Kerbi::Mixer
       g.yaml 'app-secret' if self.values[:secret]
       g.hash({kind: 'Deployment'})  #etc...
 
-      g.patched_with yamls: ['annotations', 'limits'] do |gp|
+      g.patched_with yamls: ['company-annotations'] do |gp|
         gp.sibling ConfigMapMixer
-        gp.chart(
-          id: 'bitnami/postgresql', 
-          values: self.values[:database],
-          cli_args: "--no-hooks"
-        )        
+        gp.chart id 'bitnami/postgresql' 
         gp.github id: 'my-org/k8s', file: 'k8s.yaml'
       end
     end

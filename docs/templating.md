@@ -6,17 +6,18 @@ the different methods.
 This page documents each strategy individually; for inspiration on how to 
 leverage multiple methods, check out the examples directory.
 
-## The gen method
+## The run method
 
-The `Kerbi::Mixer#run` method is where it all happens. Kerbi translates the 
-method's return value into yaml.
+The `Kerbi::Mixer#run` method is where it all happens. This method returns 
+a list of hashes, which is ultimately converted into YAML by the `Kerbi::Engine`. 
 
-**The way you should** use `gen` is to pass it a block and make
+
+**The way you should** use `run` is to pass it a block and make
 calls to the builder it passes. 
 
 ```ruby
 class MixerWithSuperDo < Kerbi::Mixer
-  def gen
+  def run
     super do |g|
       g.hash foo: 'bar'
       g.yaml 'some-file'
@@ -122,7 +123,7 @@ module MachineLearning
     def gen
       super do |g|
         g.yamls in: './../storage'
-        g.yamls
+        g.yamls except: 'service.yaml.erb' #'in' is not passed, search current dir
       end
     end
   end
@@ -130,7 +131,9 @@ end
 ```
 
 When `in: <dir-name>` is passed to to `yamls`, it looks for `*.yaml` and `*.yaml.erb`
-files in `<dir-name>`. If `in: <dir-name>` is not passed, it looks in the current
+files in `<dir-name>`. 
+
+If `in: <dir-name>` is not passed, it looks in the current
 directory, according to `locate_self`.
 
 
@@ -208,19 +211,75 @@ Kerbi can injest output from the `helm template` command if you point
 it to a repo.
 
 ```ruby
-class BackendMixer < Kerbi::Mixer
+class WithHelmMixer < Kerbi::Mixer
   def run
     super do |g|
-      g.chart id: 'stable/prometheus'
+      g.chart(
+        id: 'stable/prometheus',
+        release: "internal",
+        values: { alertmanager: { service: { type: 'ClusterIP' } } },
+        inline_assigns: { "configmapReload.prometheus.enabled": true },
+        cli_args: "--timeout duration 1m0s"
+      )
     end
   end
 end
 ```
 
-| name           | notes                                                                       | default | required |   |
-|----------------|-----------------------------------------------------------------------------|---------|----------|---|
-| id             | charts as identified by helm: <org/chart-name>                              | `nil`   | true     |   |
-| release        | value many charts use for interpolation                                     | "kerbi" | false    |   |
-| values         | hash to be serialized to a temp values.yaml file passed to helm as `-f`     | `{}`    | false    |   |
-| inline_assigns | deep-key hash passed to helm with --set e.g `{"service.type": "ClusterIP"}` | `{}`    | false    |   |
-| cli_args       | string to be passed in `helm template` command e.g "--atomic --replace"     | `nil`   | false    |   |
+| name           | notes                                                                       | default | required |
+|----------------|-----------------------------------------------------------------------------|---------|----------|
+| id             | charts as identified by helm: <org/chart-name>                              | `nil`   | true     |
+| release        | value many charts use for interpolation                                     | "kerbi" | false    |
+| values         | hash to be serialized to a temp values.yaml file passed to helm as `-f`     | `{}`    | false    |
+| cli_args       | string to be passed in `helm template` command e.g "--atomic --replace"     | `nil`   | false    |
+
+
+#### Adding missing repos
+
+In keeping true to Kerbi's functional nature, by default, Kerbi will not add 
+missing repos if they cannot be found.
+
+To get around this, you can add your own logic in the your entrypoint file:
+
+```ruby
+require 'kerbi'
+
+system("helm repo add xxx yyy")
+```
+
+#### Configuration
+
+You can slightly modify the Kerbi's Helm behavior changing
+the global config:
+
+```ruby
+require 'kerbi'
+
+config.tmp_helm_values_path = '/some/other/file.yaml'
+config.helm_exec ='/a/helm/binary'
+```
+
+By default, `tmp_helm_values_path` is '/tmp/kerbi-helm-vals.yaml'. This 
+is the file that Kerbi writes your `values` hash passed in the `chart` call. 
+The file is delete as soon as the `helm template` system call has executed.
+
+
+## Loading YAML from Github
+
+You can point Kerbi to a YAML file inside Github project as well:
+
+ ```ruby
+
+class WithGithubMixer < Kerbi::Mixer
+  def run
+    super do |g|
+      g.github(
+        id: 'kubernetes/website', 
+        file: 'content/en/examples/application/wordpress/mysql-deployment.yaml',  
+        branch: 'master'
+      )
+    end
+  end
+end
+
+``` 

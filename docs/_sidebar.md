@@ -1,6 +1,6 @@
 * [Kerbi](intro.md)
 * [Getting Started](README.md)
 * [Values in Kerbi](values.md)
-* [Subclassing Gen](the-gen-class.md)
+* [Subclassing Mixer](the-gen-class.md)
 * [Templating](templating.md)
 * [Code Organization](code-org.md)
