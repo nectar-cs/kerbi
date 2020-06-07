@@ -18,7 +18,6 @@ RSpec.describe Kerbi::Mixer do
     system "rm -rf #{root}"
     system "mkdir #{root}"
     Kerbi::Mixer.locate_self root
-    # allow(subject.class).to receive(:class_pwd).and_return(root)
   end
 
   describe "#resolve_file_name" do
@@ -96,9 +95,8 @@ RSpec.describe Kerbi::Mixer do
         project: 'nectar-cs/charts-and-wizards',
         file: 'wiz-ci/kerbi-chart/values.yaml'
       }
-
       actual = subject.inflate_yaml_http(options, nil, nil, {})
-      expect(actual.first.keys.count).to eq(3)
+      expect(actual.first.&keys.count).to eq(3)
     end
   end
 
@@ -137,7 +135,7 @@ RSpec.describe Kerbi::Mixer do
   end
 
   describe "integration" do
-    it 'works' do
+    it 'returns the expected list of hashes' do
       result = subject.run do |r|
         r.yaml tmp_file(YAML.dump({ k1: 'v1' }))
         r.hash({k2: 'v2'})

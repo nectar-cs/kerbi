@@ -27,6 +27,9 @@ module Kerbi
       end.join("\n")
     end
 
+    def config
+    end
+
     protected
 
     def gen
@@ -42,5 +45,5 @@ end
 # The singleton Kerbi::Engine, where the user can add generators invoke invoke the templating engine
 # @return [Kerbi::Engine] singleton instance of Kerbi::App
 def kerbi
-  @kerbi ||= Kerbi::Engine.new
+  $kerbi ||= Kerbi::Engine.new
 end
