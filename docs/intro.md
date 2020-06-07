@@ -36,8 +36,12 @@ class BackendGen < Kerbi::Mixer
 
       g.patched_with yamls: ['annotations', 'limits'] do |gp|
         gp.sibling ConfigMapMixer
-        gp.helm id: 'org/repo', version: '1.2.3'        
-        gp.github id: 'my-org/k8s', file: 'other.yaml.erb'
+        gp.chart(
+          id: 'bitnami/postgresql', 
+          values: self.values[:database],
+          cli_args: "--no-hooks"
+        )        
+        gp.github id: 'my-org/k8s', file: 'k8s.yaml'
       end
     end
   end 

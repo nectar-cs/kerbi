@@ -14,7 +14,7 @@ module Kerbi
         end
 
         ##
-        # Writes a hash of values to a YAML in a temp file
+        # Writes a hash of values to a YAML to a temp file
         # @param [Hash] values a hash of values
         # @return [String] the path of the file
         def make_tmp_values_file(values)
@@ -45,7 +45,7 @@ module Kerbi
         end
 
         ##
-        # This and that
+        # Runs the helm template command
         # @param [String] release release name to pass to Helm
         # @param [String] project <org>/<chart> string identifying helm chart
         # @param [Hash] values hash of values to patch chart values

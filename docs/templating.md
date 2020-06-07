@@ -8,7 +8,7 @@ leverage multiple methods, check out the examples directory.
 
 ## The gen method
 
-The `Kerbi::Mixer#gen` method is where it all happens. Kerbi translates the 
+The `Kerbi::Mixer#run` method is where it all happens. Kerbi translates the 
 method's return value into yaml.
 
 **The way you should** use `gen` is to pass it a block and make
@@ -71,7 +71,7 @@ roleRef:
 Our generator would look like:
 
 ```ruby
-class RbacGen < Kerbi::Mixer
+class RbacMixer < Kerbi::Mixer
   locate_self __dir__
   
   def gen
@@ -141,7 +141,7 @@ The third option is to pass in actual Ruby hashes.
 
 ```ruby
 #foundation/gen.rb
-class FoundationsGen < Kerbi::Mixer
+class FoundationsMixer < Kerbi::Mixer
   locate_self __dir__
   
   def gen
@@ -169,7 +169,7 @@ in your block.
 
 A very simple example: 
 ```ruby
-class TrivialPatchGen < Kerbi::Mixer
+class TrivialPatchMixer < Kerbi::Mixer
   def gen
     super do |g|
       g.hash foo: 'foo'
@@ -201,3 +201,26 @@ The `patched_with` accepts different patch sources:
 
 `yamls` and `yamls_in` use the same filename resolution logic detailed above.
 
+
+## Loading YAML from Helm Charts
+
+Kerbi can injest output from the `helm template` command if you point
+it to a repo.
+
+```ruby
+class BackendMixer < Kerbi::Mixer
+  def run
+    super do |g|
+      g.chart id: 'stable/prometheus'
+    end
+  end
+end
+```
+
+| name           | notes                                                                       | default | required |   |
+|----------------|-----------------------------------------------------------------------------|---------|----------|---|
+| id             | charts as identified by helm: <org/chart-name>                              | `nil`   | true     |   |
+| release        | value many charts use for interpolation                                     | "kerbi" | false    |   |
+| values         | hash to be serialized to a temp values.yaml file passed to helm as `-f`     | `{}`    | false    |   |
+| inline_assigns | deep-key hash passed to helm with --set e.g `{"service.type": "ClusterIP"}` | `{}`    | false    |   |
+| cli_args       | string to be passed in `helm template` command e.g "--atomic --replace"     | `nil`   | false    |   |

@@ -114,6 +114,28 @@ module Kerbi
     end
 
     ##
+    # Runs the helm template command
+    # @param [Hash] opts kwargs
+    # @param [Array<String>] whitelist list res-id's to whitelist from results
+    # @param [Array<String>] blacklist list res-id's to blacklist from results
+    # @option [String] release release name to pass to Helm
+    # @option [String] project <org>/<chart> string identifying helm chart
+    # @option [Hash] values hash of values to patch chart values
+    # @option [Hash] inline_assigns inline values for --set
+    # @option [String] cli_args extra cli args for helm
+    # @return [Array<Hash>] list of res-hashes
+    def inflate_helm_output(opts, whitelist, blacklist)
+      raw_yaml = Kerbi::Utils::Helm.template(
+        opts[:release] || 'kerbi',
+        opts[:id],
+        opts[:values] || {},
+        opts[:inline_assigns] || {},
+        opts[:cli_args]
+      )
+      self.inflate_raw_str(raw_yaml, whitelist, blacklist, {})
+    end
+
+    ##
     # Finds all .yaml and .yaml.erb files in a directory
     # @param [String, dir] dir relative or absolute path of the directory
     # @param [Array<String>] file_blacklist list of filenames to avoid

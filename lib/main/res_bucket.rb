@@ -104,6 +104,24 @@ module Kerbi
       self.output << parent.inflate_yaml_http(params, only, except, {})
     end
 
+    ##
+    # Runs the helm template command
+    # @param [Hash] opts kwargs
+    # @option opts [String] release release name to pass to Helm
+    # @option opts [String] project <org>/<chart> string identifying helm chart
+    # @option opts [Hash] values hash of values to patch chart values
+    # @option opts [Hash] inline_assigns inline values for --set
+    # @option opts [String] cli_args extra cli args for helm
+    # @option opts [Array<String>] whitelist list res-id's to whitelist from results
+    # @option opts [Array<String>] blacklist list res-id's to blacklist from results
+    # @return [Array<Hash>] list of res-hashes
+    def chart(**opts)
+      whitelist, blacklist = opts.delete(:only), opts.delete(:except)
+      self.output += self.parent.inflate_helm_output(
+        opts, whitelist, blacklist
+      )
+    end
+
     private
 
     def method_missing(method, *args)
