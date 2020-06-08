@@ -90,7 +90,7 @@ module Kerbi
     # @param [Array<String>] only optional whitelist of k8s-ids
     # @param [Array<String>] except optional blacklist of k8s-ids
     def hashes(hashes, only: nil, except: nil)
-      self.output << parent.clean_and_filter_hashes(hashes, only, except)
+      self.output += parent.clean_and_filter_hashes(hashes, only, except)
     end
 
     ##
@@ -101,7 +101,7 @@ module Kerbi
     # @param [Array<String>] except optional blacklist of k8s-ids
     def github(id:, file:, only: nil, except: nil)
       params = {from: 'github', id: id, file: file}
-      self.output << parent.inflate_yaml_http(params, only, except, {})
+      self.output += parent.inflate_yaml_http(params, only, except, {})
     end
 
     ##
@@ -112,8 +112,8 @@ module Kerbi
     # @option opts [Hash] values hash of values to patch chart values
     # @option opts [Hash] inline_assigns inline values for --set
     # @option opts [String] cli_args extra cli args for helm
-    # @option opts [Array<String>] whitelist list res-id's to whitelist from results
-    # @option opts [Array<String>] blacklist list res-id's to blacklist from results
+    # @option opts [Array<String>] only list res-id's to whitelist from results
+    # @option opts [Array<String>] except list res-id's to blacklist from results
     # @return [Array<Hash>] list of res-hashes
     def chart(**opts)
       whitelist, blacklist = opts.delete(:only), opts.delete(:except)

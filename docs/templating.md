@@ -6,9 +6,17 @@ and outputs them as an array of hashes.
 
 This page documents the methods available for injesting.
 
+For comprehensive documentation, refer to the 
+[ResBucket](https://www.rubydoc.info/gems/kerbi/Kerbi/ResBucket) and
+[Mixer](https://www.rubydoc.info/gems/kerbi/Kerbi/Mixer) docs on RubyGems.
+
 ### The run method
 
 The `Kerbi::Mixer#run` method is where all injesting and mixing must happen. 
+
+
+
+
 
 #### Run with the aggregator
 
@@ -34,6 +42,10 @@ The `g` in `super do |g|` is an aggregator of type `Kerbi::ResBucket`. The funct
 `hash`, `yaml`, `yamls`, `patched_with`, `chart`, `github, `mixer` - all 
 produce and lists of hashes and add them immediately to the bucket `g`. See the
 api docs for a complete description.
+
+
+
+
 
 #### Run without the aggregator
 
@@ -62,7 +74,7 @@ end
 
 ## Loading YAML files
 
-Use `g.yaml <fname>` to load YAML and ERB files alike.
+Use `g.yaml <fname>` to load YAML and ERB files alike. 
 
 ERB files are loaded with the current class context, which includes the `values`
 accessor, as well as any custom methods you provide.
@@ -116,6 +128,10 @@ end
 The `g.yaml` method also accepts an `extra` hash that allows for 
 last minute customization.
 
+Comprehensive method 
+[documentation](https://www.rubydoc.info/gems/kerbi/Kerbi/ResBucket#yaml-instance_method).
+
+
 ## Loading YAMLS from a directory
 
 You can load every YAML and ERB file (non-recursively) from 
@@ -163,6 +179,8 @@ files in `<dir-name>`.
 If `in: <dir-name>` is not passed, it looks in the current
 directory, according to `locate_self`.
 
+Comprehensive method 
+[documentation](https://www.rubydoc.info/gems/kerbi/Kerbi/ResBucket#yamls-instance_method).
 
 
 ## Loading Hashes
@@ -175,12 +193,12 @@ class DevNamespacesMixer < Kerbi::Mixer
   def run
     super do |g|
       values[:org][:developers].each do |developer|
-        g.hash self.template_namespace(developer)
+        g.hash self.namespace_res_hash(developer)
       end
     end
   end
 
-  def template_namespace(name)
+  def namespace_res_hash(name)
     {
       kind: 'Namespace',
       metadata: { name: name }
@@ -188,6 +206,12 @@ class DevNamespacesMixer < Kerbi::Mixer
   end
 end
 ```
+
+Comprehensive method 
+[documentation](https://www.rubydoc.info/gems/kerbi/Kerbi/ResBucket#hash-instance_method).
+
+
+
 
 
 ## Using Patches
@@ -249,6 +273,13 @@ end
 
 `yamls` and `yamls_in` use the same filename resolution logic detailed above.
 
+Comprehensive method 
+[documentation](https://www.rubydoc.info/gems/kerbi/Kerbi/ResBucket#patched_with-instance_method).
+
+
+
+
+
 
 ## Loading YAML from Helm Charts
 
@@ -277,6 +308,14 @@ end
 | release        | value many charts use for interpolation                                     | "kerbi" | false    |
 | values         | hash to be serialized to a temp values.yaml file passed to helm as `-f`     | `{}`    | false    |
 | cli_args       | string to be passed in `helm template` command e.g "--atomic --replace"     | `nil`   | false    |
+
+
+Comprehensive method 
+[documentation](https://www.rubydoc.info/gems/kerbi/Kerbi/ResBucket#chart-instance_method).
+
+
+
+
 
 
 #### Adding missing repos
@@ -314,6 +353,12 @@ is the file that Kerbi writes your `values` hash passed in the `chart` call.
 The file is delete as soon as the `helm template` system call has executed.
 
 
+
+
+
+
+
+
 ## Loading YAML files from Github
 
 You can point Kerbi to a YAML file inside Github project as well:
@@ -334,10 +379,20 @@ end
 
 ``` 
 
+Comprehensive method 
+[documentation](https://www.rubydoc.info/gems/kerbi/Kerbi/ResBucket#github-instance_method).
+
+
+
+
+
+
+
 ## Loading output from other Mixers
 
 You can invoke a second mixer from inside your mixer as follows:
  
+ The inner mixer:
 ```ruby
 # invoked_mixer.rb
 class InvokedMixer < Kerbi::Mixer
@@ -349,6 +404,7 @@ class InvokedMixer < Kerbi::Mixer
 end
 ```
 
+The outer mixer:
 ```ruby
 # invoking_mixer.rb
 require_relative 'invoked_mixer.rb'
@@ -362,8 +418,5 @@ class InvokingMixer < Kerbi::Mixer
 end
 ```
 
-
-
-
-
-
+Comprehensive method 
+[documentation](https://www.rubydoc.info/gems/kerbi/Kerbi/ResBucket#mixer-instance_method).

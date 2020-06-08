@@ -12,7 +12,6 @@ RUN mv linux-amd64/helm /usr/local/bin
 RUN rm helm_bin.tar.gz
 RUN rm -rf linux-amd64
 
-
 ADD Gemfile Gemfile.lock ./
 
 RUN gem install bundler && \
