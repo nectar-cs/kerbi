@@ -3,7 +3,7 @@
 The whole point of Kerbi is to be free to organize things your way. 
 Nevertheless, below is a collection of sensible patterns.
 
-### With Balanced Directories
+### Balanced per-microservice approach
 
 The most obvious and common pattern found across existing tools.
 
@@ -55,26 +55,26 @@ kerbi.generators = [ Microservice::BackendMixer, Microservice::FrontendMixer ]
 puts kerbi.gen_yaml
 ```
 
-## With Heavy Reuse
+### Mixer-defined Control Flow Approach
 
-If you want things to be as programmatic as possible,
-you can use feed Mixers to other Mixers:
-
-```bash
-├───main.rb
-├───microservices
-    ├───backend
-    │   ├───mixer.rb
-    │   └───workloads.yaml.erb
-    ├───frontend
-    │   ├───mixer.rb
-    │   └───workloads.yaml
-├───values
-│   ├───production.rb
-│   └───values.yaml
-```
-
+If you want things to be as programmatic as possible, you 
+can pass in one Mixer to the engine, and have that mixer
+decide which child Mixers it should run.
 
 ```ruby
+# application.rb
 
-``` 
+class ApplicationMixer < Kerbi::Mixer
+  def run
+    super do |g|
+      if something
+        g.mixer MixerOne, root: values[:subtree_one]
+        g.mixer MixerTwo, root: values[:subtree_two]
+      else
+        g.mixer MixerThree, root: { foo: 'bar' }
+      end
+    end
+  end
+end
+```
+Here, Mixers one, two, and three can in turn call `g.mixer` to other mixers.

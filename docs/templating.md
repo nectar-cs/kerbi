@@ -6,15 +6,17 @@ and outputs them as an array of hashes.
 
 This page documents the methods available for injesting.
 
-## The run method
+### The run method
 
 The `Kerbi::Mixer#run` method is where all injesting and mixing must happen. 
 
-**The way you should** use `run` is to pass it a block and make
-calls to the builder it passes. 
+#### Run with the aggregator
+
+**The standard way to** use `run` is to pass it a aggregator and make
+calls to the builder it passes.
 
 ```ruby
-class MixerWithSuperDo < Kerbi::Mixer
+class TypicalMixer < Kerbi::Mixer
   def run
     super do |g|
       g.hash foo: 'bar'
@@ -28,16 +30,39 @@ class MixerWithSuperDo < Kerbi::Mixer
 end
 ```
 
-The `g` in `super do |g|` is known as an aggregator. It amasses the
-results of your invocations and returns an array. The functions it exposes - 
-`hash`, `yaml`, `yamls`, `patched_with` - all return arrays of hashes.
+The `g` in `super do |g|` is an aggregator of type `Kerbi::ResBucket`. The functions it exposes - 
+`hash`, `yaml`, `yamls`, `patched_with`, `chart`, `github, `mixer` - all 
+produce and lists of hashes and add them immediately to the bucket `g`. See the
+api docs for a complete description.
 
-While you could return a list of hashes directly from `run` without using the 
-aggregator, you would not be playing to Kerbi's strengths.
+#### Run without the aggregator
+
+In some cases, you'll need to injest hashes without adding 
+them directly to the bucket. For instance, you'd like to load the contents of a 
+YAML file, change values, and then submit the processed objects.
+
+In this case, you'll want to call the `Kerbi::Mixer` instance methods directly. 
+See the api docs for the complete list of methods in `Kerbi::Mixer`. For example:
+
+```ruby
+class MixerWithDirectCalls < Kerbi::Mixer
+  def run
+    super do |g|
+      from_yaml = self.inflate_yaml_file('my-file', [], [], {})
+      from_yaml.first['metadata']['annotations'].merge!(
+        new_annotation: 'new-value'        
+      )
+      g.hashes from_yaml    
+    end    
+  end    
+end
+```
+
+
 
 ## Loading YAML files
 
-You can use the same `g.yaml <fname>` call to load YAML and ERB files alike.
+Use `g.yaml <fname>` to load YAML and ERB files alike.
 
 ERB files are loaded with the current class context, which includes the `values`
 accessor, as well as any custom methods you provide.

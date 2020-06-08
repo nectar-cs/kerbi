@@ -4,13 +4,23 @@
 Kerbi (Kubernetes Emdedded Ruby Interpolator) is yet another templating engine for 
 generating Kubernetes resource manifests. 
 
-It enables the mixed use of the three most popular templating strategies under one roof:
+You create manifests by mixing different templating strategies, and
+different manifest sources, all under one roof.
+
+**Templating strategies**:
 - embedding values and code into YAML files (e.g [Helm](https://github.com/helm/helm))
 - patching and overlaying YAML/objects (e.g [kustomize](https://github.com/kubernetes-sigs/kustomize))
 - serializing YAML from in-memory objects (e.g [jsonnet](https://github.com/google/jsonnet))
 
-Can mixing different strategies lead to abominable anti-patterns? Absolutely. But 
-Kerbi is a free spirited enabler who does not judge. 
+**Manifest sources**:
+- YAML
+- ERB (ruby-embedded YAML)
+- Helm charts
+- Files on GitHub
+- Ruby hashes
+
+Can mixing sources and strategies lead to abominable anti-patterns? Absolutely. But 
+Kerbi is designed only to enable. 
 
 ### Features
 - Seamless mixing of `yaml`, `yaml.erb`, github files, `helm` charts, and in-memory objects
@@ -73,30 +83,30 @@ a lot more, and b) there is no required directory structure.
 
 
 ```ruby
-class Main < Kerbi::Mixer
+class BarMixer < Kerbi::Mixer
   def run
     super do |g|
       g.hash foo: 'bar'
+    end
+  end 
+end
+
+class BazMixer < Kerbi::Mixer
+  def run
+    super do |g|
       g.hash foo: 'baz'
     end
   end 
 end
 
-kerbi.generators = [ Main ]
+
+kerbi.generators = [ BarMixer, BazMixer ]
 puts kerbi.gen_yaml 
 # => foo: bar 
 # => ---
 # => foo: baz
 ```
 
-### Install
+## Getting Started
 
-Inside a new project's Gemfile:  
-
-```
-gem 'kerbi'
-```
-
-Then `bundle install`.
-
-
+Read the [documentation](https://nectar-cs.github.io/kerbi/getting-started) from Github Pages 
