@@ -92,3 +92,8 @@ For nested keys, use `.` to designate levels of nesting. So:
 ruby main.rb --set networking.ingress.enabled:true
 ```
 
+This is useful for keeping sensitive values out of version control.
+
+## Next
+
+Continue onto the [Mixer overview](subclassing-mixer.md).

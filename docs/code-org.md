@@ -17,10 +17,10 @@ The most obvious and common pattern found across existing tools.
 │   └───internal-service.yaml
 ├───microservices
     ├───backend
-    │   ├───gen.rb
+    │   ├───mixer.rb
     │   └───workloads.yaml.erb
     ├───frontend
-    │   ├───gen.rb
+    │   ├───mixer.rb
     │   └───workloads.yaml
 ├───values
 │   ├───production.rb
@@ -29,11 +29,11 @@ The most obvious and common pattern found across existing tools.
 
 Individual gens must use relative paths to reach reference antecedent directories:
 ```ruby
-#microservices/backend/gen.rb
-class Microservice::BackendGen < Kerbi::Mixer
+# microservices/backend/mixer.rb
+class Microservice::BackendMixer < Kerbi::Mixer
   locate_self __dir__
   
-  def gen
+  def run
     super do |g|
       g.patched_with yamls_in: './../../common-patches' do |gp|
         gp.yaml 'workloads'
@@ -47,26 +47,27 @@ end
 And the entrypoint `main.rb` must require its generators:
 
 ```ruby
-require_relative './microservices/backend/gen'
-require_relative './microservices/frontend/gen'
+# main.rb
+require_relative './microservices/backend/mixer'
+require_relative './microservices/frontend/mixer'
 
-kerbi.generators = [ Microservice::BackendGen, Microservice::FrontendGen ]
+kerbi.generators = [ Microservice::BackendMixer, Microservice::FrontendMixer ]
 puts kerbi.gen_yaml
 ```
 
 ## With Heavy Reuse
 
 If you want things to be as programmatic as possible,
-you can use feed Gens to other Gens:
+you can use feed Mixers to other Mixers:
 
 ```bash
 ├───main.rb
 ├───microservices
     ├───backend
-    │   ├───gen.rb
+    │   ├───mixer.rb
     │   └───workloads.yaml.erb
     ├───frontend
-    │   ├───gen.rb
+    │   ├───mixer.rb
     │   └───workloads.yaml
 ├───values
 │   ├───production.rb

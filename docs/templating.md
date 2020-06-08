@@ -1,16 +1,14 @@
 # Templating
 
-You can make Kerbi generate the same YAML in many different ways by combining 
-the different methods. 
+A mixer injests different formats - `yaml` files, `yaml.erb` files, Helm charts, 
+ruby hashes, and remote files - loads them into memory, parses them, 
+and outputs them as an array of hashes. 
 
-This page documents each strategy individually; for inspiration on how to 
-leverage multiple methods, check out the examples directory.
+This page documents the methods available for injesting.
 
 ## The run method
 
-The `Kerbi::Mixer#run` method is where it all happens. This method returns 
-a list of hashes, which is ultimately converted into YAML by the `Kerbi::Engine`. 
-
+The `Kerbi::Mixer#run` method is where all injesting and mixing must happen. 
 
 **The way you should** use `run` is to pass it a block and make
 calls to the builder it passes. 
@@ -34,6 +32,8 @@ The `g` in `super do |g|` is known as an aggregator. It amasses the
 results of your invocations and returns an array. The functions it exposes - 
 `hash`, `yaml`, `yamls`, `patched_with` - all return arrays of hashes.
 
+While you could return a list of hashes directly from `run` without using the 
+aggregator, you would not be playing to Kerbi's strengths.
 
 ## Loading YAML files
 
@@ -69,13 +69,13 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ```
 
-Our generator would look like:
+Our Mixer would look like:
 
 ```ruby
 class RbacMixer < Kerbi::Mixer
   locate_self __dir__
   
-  def gen
+  def run
     super do |g|
       g.yaml 'role'
       g.yaml 'role-binding'
@@ -105,22 +105,24 @@ Take the following project:
 │   ├───postgres-deployment.yaml.erb
 │   └───postgres-service.yaml.erb
 ├───machine-learning
-│   ├───gen.rb
+│   ├───mixer.rb
 │   ├───service.yaml.erb
 │   └───replicaset.yaml
 ├───values
 │   └───values.yaml
 ```
 
-The following generator loads the yaml files in `storage` and `machine-learning`:
+The Mixer below loads the yaml files in `storage` and `machine-learning`. 
+Notice that our class must call `locate_self` in order to tell the Mixer
+where it is in the project hierarchy.
 
 ```ruby
-#machine-learning/gen.rb
+#machine-learning/mixer.rb
 module MachineLearning
   class Mixer < Kerbi::Mixer
     locate_self __dir__
   
-    def gen
+    def run
       super do |g|
         g.yamls in: './../storage'
         g.yamls except: 'service.yaml.erb' #'in' is not passed, search current dir
@@ -140,14 +142,12 @@ directory, according to `locate_self`.
 
 ## Loading Hashes
 
-The third option is to pass in actual Ruby hashes.   
+Mixers can of course injest ruby hashes as well.   
 
 ```ruby
-#foundation/gen.rb
-class FoundationsMixer < Kerbi::Mixer
-  locate_self __dir__
-  
-  def gen
+#foundation/mixer.rb
+class DevNamespacesMixer < Kerbi::Mixer
+  def run
     super do |g|
       values[:org][:developers].each do |developer|
         g.hash self.template_namespace(developer)
@@ -167,13 +167,13 @@ end
 
 ## Using Patches
 
-With a `patch_with` block, you can merge hashes onto the hashes being loaded
-in your block.
+With a `patched_with` block, you can merge hashes onto the hashes being loaded
+in your block, just like with Kustomize.
 
 A very simple example: 
 ```ruby
 class TrivialPatchMixer < Kerbi::Mixer
-  def gen
+  def run
     super do |g|
       g.hash foo: 'foo'
       g.patched_with hash: {foo: 'you-got-patched'} do |gp|
@@ -202,6 +202,26 @@ The `patched_with` accepts different patch sources:
 | yamls    | array of yaml filenames             |
 | yamls_in | single name of dir containing yamls |
 
+Different sources may be given in the same call:
+
+```ruby
+class MultiPatchMixer < Kerbi::Mixer
+  def run
+    super do |g|
+      sources = {
+        hashes: [{foo: 'bar'}, {bar: 'baz'}],
+        yamls: %w[company-annotations lean-resource-limits],
+        yamls_in: './../application-wide-patches',                         
+      }    
+
+      g.patched_with **sources do |gp|
+        gp.hash foo: 'bar', bar: 'bar'
+      end
+    end
+  end
+end
+```
+
 `yamls` and `yamls_in` use the same filename resolution logic detailed above.
 
 
@@ -211,7 +231,7 @@ Kerbi can injest output from the `helm template` command if you point
 it to a repo.
 
 ```ruby
-class WithHelmMixer < Kerbi::Mixer
+class HelmChartMixer < Kerbi::Mixer
   def run
     super do |g|
       g.chart(
@@ -242,21 +262,26 @@ missing repos if they cannot be found.
 To get around this, you can add your own logic in the your entrypoint file:
 
 ```ruby
+# main.rb
 require 'kerbi'
 
 system("helm repo add xxx yyy")
+
+# run engine etc...
 ```
 
 #### Configuration
 
-You can slightly modify the Kerbi's Helm behavior changing
-the global config:
+You can slightly modify Kerbi's Helm behavior by changing the global config:
 
 ```ruby
+# main.rb
 require 'kerbi'
 
 config.tmp_helm_values_path = '/some/other/file.yaml'
 config.helm_exec ='/a/helm/binary'
+
+# run engine etc...
 ```
 
 By default, `tmp_helm_values_path` is '/tmp/kerbi-helm-vals.yaml'. This 
@@ -264,13 +289,13 @@ is the file that Kerbi writes your `values` hash passed in the `chart` call.
 The file is delete as soon as the `helm template` system call has executed.
 
 
-## Loading YAML from Github
+## Loading YAML files from Github
 
 You can point Kerbi to a YAML file inside Github project as well:
 
  ```ruby
 
-class WithGithubMixer < Kerbi::Mixer
+class GithubFileMixer < Kerbi::Mixer
   def run
     super do |g|
       g.github(
@@ -283,3 +308,37 @@ class WithGithubMixer < Kerbi::Mixer
 end
 
 ``` 
+
+## Loading output from other Mixers
+
+You can invoke a second mixer from inside your mixer as follows:
+ 
+```ruby
+# invoked_mixer.rb
+class InvokedMixer < Kerbi::Mixer
+  def run
+    super do |g|
+      g.hash foo: "got #{self.values[:foo]}"
+    end            
+  end  
+end
+```
+
+```ruby
+# invoking_mixer.rb
+require_relative 'invoked_mixer.rb'
+
+class InvokingMixer < Kerbi::Mixer
+  def run
+    super do |g|
+      g.mixer InvokedMixer, values: { foo: 'bar' }
+    end    
+  end  
+end
+```
+
+
+
+
+
+

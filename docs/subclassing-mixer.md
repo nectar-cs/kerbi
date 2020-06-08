@@ -1,20 +1,21 @@
 
-# Subclassing Gen
+# Subclassing a Mixer
 
-Most of the action in your `Kerbi::Mixer` subclasses happens in the `gen` function. 
-Before going there, it's useful to know how `Kerbi::Mixer` subclasses work at a high level.
+Most of the action in your `Kerbi::Mixer` subclasses happens in the `run` function. 
+Before going there, it's useful to understand `Kerbi::Mixer` as a whole.
 
-## How Gens are consumed 
+## How Mixers are consumed 
 
 As a user, you don't typically instantiate your `Kerbi::Mixer` subclasses. 
 Instead, you pass a list of the class objects to Kerbi: 
 ```ruby
+# main.rb
 require 'kerbi'
 
 class MixerOne < Kerbi::Mixer; end
 class MixerTwo < Kerbi::Mixer; end
 
-kerbi.generators = [GenOne, GenTwo]
+kerbi.generators = [MixerOne, MixerTwo]
 ```
 
 ## Accessing the Values hash
@@ -51,14 +52,14 @@ Assume the following directory structure:
 ├───Gemfile
 ├───main.rb
 ├───machine-learning
-│   ├───gen.rb
+│   ├───mixer.rb
 │   ├───service.yaml.erb
 │   └───replicaset.yaml
 ├───values
 │   └───values.yaml
 ```
 
-And the following `MachineLearning::Gen` class:
+And the following `MachineLearning::Mixer` class:
 
 ```ruby
 module MachineLearning
@@ -66,7 +67,7 @@ module MachineLearning
 
     locate_self __dir__ #thanks to this
 
-    def gen
+    def run
       super do |g|
         g.yaml 'service'
         g.yaml 'replicaset' 
@@ -83,13 +84,13 @@ For this to work,
 **need to call** the class method `locate_self` in your subclass. 
 
 
-## Limiting values to subtree
+## Limiting values to a subtree
 
 It often makes sense to limit a particular `Kerbi::Mixer` subclass's access to
 a particular subtree of the global values tree.
 This is accomplished by overriding the constructor - `initialize`.
 
-In this example, we limit `FrontendGen` to the `frontend` subtree.
+In this example, we limit `FrontendMixer` to the `frontend` subtree.
 
 ```yaml
 backend:
@@ -119,7 +120,7 @@ end
 ## Writing Helpers
 
 The `Kerbi::Mixer` class is a simple Ruby object; you can decorate
-subclasses with any and all the helper methods you need to perform extra logic.
+subclasses with any helper methods you need to perform extra logic.
 
 Below are common use cases:
 
@@ -130,7 +131,7 @@ To keep ERB's clean, it can be useful to write anything more than a trivial
 
 
 ```ruby
-class BackendGen < Kerbi::Mixer
+class BackendMixer < Kerbi::Mixer
   def ingress_enabled?
     values&.dig(:networking, :type) == 'ingress'
   end
@@ -142,7 +143,7 @@ end
 Leveraging Ruby's safe navigation and hash accessors:
 
 ```ruby
-class PostgresGen < Kerbi::Mixer
+class PostgresMixer < Kerbi::Mixer
   def pg_secrets_ready?
     root = values&.dig(:storage, :secrets) || {}
     user, password = root[:user], root[:password]

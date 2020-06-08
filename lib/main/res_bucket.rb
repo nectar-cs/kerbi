@@ -73,7 +73,7 @@ module Kerbi
       end
     end
 
-    def sibling(sibling_class, root=self.parent.values)
+    def mixer(sibling_class, root=self.parent.values)
       self.output += sibling_class.new(root).run
     end
 

@@ -15,26 +15,41 @@ After running `bundle install` create a `main.rb` and `values.yaml` such that yo
 │   └───values.yaml
 ```  
 
-At this point we can make sure everything works by creating our first generator in `main.rb`:
+At this point we can make sure everything works by creating our first mixer in `main.rb`:
 
 ```ruby
 require 'kerbi'
 
-class OurFirstGen < Kerbi::Mixer
-  def gen
-    { foo: values[:foo] }
+class HelloWorldMixer < Kerbi::Mixer
+  def run
+    super do |g|
+      g.hash hello: "I am #{values[:status] || "almost"} templating with Kerbi"
+    end
   end
 end
 
-kerbi.generators = [ OurFirstGen ]
+kerbi.generators = [ HelloWorldMixer ]
 puts kerbi.gen_yaml
 ```
 
 And our first values in `values/values.yaml`:
 ```yaml
-foo: bar
+status: "successfully"
 ```
 
 Then, run your `main.rb` as you would any Ruby script:
 
-`$ ruby main.rb` or `$ bundle exec ruby main.rb`
+```bash
+ruby main.rb 
+# or
+bundle exec ruby main.rb
+```
+
+The output should be 
+```yaml
+hello: "I am successfully templating with Kerbi"
+```
+
+## Next: Values
+
+Continue onto [values in Kerbi](values.md).
