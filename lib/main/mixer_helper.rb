@@ -22,7 +22,7 @@ module Kerbi
       if opts[:from] == 'github'
         base = "https://raw.githubusercontent.com"
         branch = opts[:branch] || 'master'
-        project, file = opts[:project], opts[:file]
+        project, file = (opts[:project] || opts[:id]), opts[:file]
         raise "Project and/or file not found" unless project && file
         "#{base}/#{project}/#{branch}/#{file}"
       end

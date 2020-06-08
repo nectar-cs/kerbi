@@ -1,7 +1,16 @@
 
 steps:
+
+  - id: "Fetch Secrets"
+    waitFor: []
+    name: gcr.io/cloud-builders/gcloud
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - 'echo $(gcloud secrets versions access latest --secret=rubygems-api-key) > rubygems-api-key.txt'
+
   - name: 'gcr.io/cloud-builders/docker'
-    id: 'test-phase'
+    id: 'Run Tests'
     args:
       - 'build'
       - '.'
@@ -9,13 +18,12 @@ steps:
       - 'RunTestsDockerfile'
 
   - name: 'gcr.io/cloud-builders/docker'
-    id: 'publish-phase'
+    id: 'Publish Gem'
+    entrypoint: 'bash'
     waitFor:
-      - 'test-phase'
+      - 'Run Tests'
     args:
-      - 'build'
-      - '.'
-      - '-f'
-      - 'PublishGemDockerfile'
-      - '--build-arg'
-      - 'RUBYGEMS_API_KEY=${_RUBYGEMS_API_KEY}'
+      - '-c'
+      - 'docker build . -f PublishGemDockerfile
+      --build-arg RUBYGEMS_API_KEY=$(cat rubygems-api-key.txt)
+      '

@@ -20,6 +20,7 @@ RSpec.describe Kerbi::ValuesManager do
           expect(actual).to eq(foo: 'bar', x: 'y')
         end
       end
+
       context "with nil conflicts" do
         it "returns a merged hash" do
           ARGV.replace %w[--set foo.bar=bar --set foo.baz=baz]

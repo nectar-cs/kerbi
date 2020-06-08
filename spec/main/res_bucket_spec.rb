@@ -21,6 +21,16 @@ RSpec.describe Kerbi::ResBucket do
     Kerbi::Mixer.locate_self root
   end
 
+  describe '#github' do
+    it 'outputs the correct hash list' do
+      subject.github(
+        id: 'nectar-cs/charts-and-wizards',
+        file: 'wiz-ci/kerbi-chart/values.yaml'
+      )
+      expect(subject.output.first.first&.keys.count).to eq(3)
+    end
+  end
+
   describe '#yaml' do
     it 'returns the correct hash list' do
       make_yaml('a.yaml', a_foo: 'bar')

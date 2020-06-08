@@ -4,7 +4,14 @@ ENV NO_COVERAGE 'true'
 
 WORKDIR /app
 
-RUN apk --update add build-base libxslt-dev libxml2-dev
+RUN apk --update add build-base libxslt-dev libxml2-dev curl
+
+RUN curl https://get.helm.sh/helm-v3.1.0-linux-amd64.tar.gz --output helm_bin.tar.gz
+RUN tar -zxvf helm_bin.tar.gz
+RUN mv linux-amd64/helm /usr/local/bin
+RUN rm helm_bin.tar.gz
+RUN rm -rf linux-amd64
+
 
 ADD Gemfile Gemfile.lock ./
 
