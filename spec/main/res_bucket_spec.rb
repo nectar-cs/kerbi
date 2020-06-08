@@ -27,7 +27,7 @@ RSpec.describe Kerbi::ResBucket do
         id: 'nectar-cs/charts-and-wizards',
         file: 'wiz-ci/kerbi-chart/values.yaml'
       )
-      expect(subject.output.first.first&.keys.count).to eq(3)
+      expect(subject.output.first&.keys.count).to eq(3)
     end
   end
 
