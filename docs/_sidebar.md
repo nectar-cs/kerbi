@@ -1,4 +1,4 @@
-* [Kerbi](intro.md)
+* [Kerbi](README.md)
 * [Getting Started](getting-started.md)
 * [Values in Kerbi](values.md)
 * [Subclassing Mixer](subclassing-mixer.md)
