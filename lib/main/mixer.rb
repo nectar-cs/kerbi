@@ -4,6 +4,7 @@ require 'active_support/core_ext/hash/deep_merge'
 require 'active_support/core_ext/hash/keys'
 require_relative './mixer_helper'
 require_relative './../utils/utils'
+require_relative './../utils/helm'
 require_relative './res_bucket'
 
 module Kerbi
@@ -43,7 +44,7 @@ module Kerbi
     # @return [String] a variation of the filename that exists
     def resolve_file_name(fname)
       dir = self.class.class_pwd
-      Kerbi::Utils.real_files_for(
+      Kerbi::Utils::Utils.real_files_for(
         fname,
         "#{fname}.yaml",
         "#{fname}.yaml.erb",
@@ -71,7 +72,7 @@ module Kerbi
     # @param [Array<String>] blacklist list/single  k8s res ID to blacklist
     # @return [Array<Hash>] list of clean and filtered hashes
     def clean_and_filter_hashes(hashes, whitelist, blacklist)
-      hashes = hashes.map(&:deep_symbolize_keys)
+      hashes = hashes.compact.map(&:deep_symbolize_keys)
       hashes = filter_res_only(hashes, whitelist)
       filter_res_except(hashes, blacklist)
     end
@@ -120,6 +121,7 @@ module Kerbi
     # @param [Array<String>] blacklist list res-id's to blacklist from results
     # @option [String] release release name to pass to Helm
     # @option [String] project <org>/<chart> string identifying helm chart
+    # @option [String] id <org>/<chart> string identifying helm chart (project alias)
     # @option [Hash] values hash of values to patch chart values
     # @option [Hash] inline_assigns inline values for --set
     # @option [String] cli_args extra cli args for helm
@@ -127,7 +129,7 @@ module Kerbi
     def inflate_helm_output(opts, whitelist, blacklist)
       raw_yaml = Kerbi::Utils::Helm.template(
         opts[:release] || 'kerbi',
-        opts[:id],
+        opts[:id] || opts[:project],
         opts[:values] || {},
         opts[:inline_assigns] || {},
         opts[:cli_args]

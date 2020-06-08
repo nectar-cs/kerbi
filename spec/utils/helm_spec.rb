@@ -1,5 +1,4 @@
 require_relative './../spec_helper'
-require_relative './../../lib/utils/helm'
 
 RSpec.describe Kerbi::Utils::Helm do
 
@@ -11,9 +10,7 @@ RSpec.describe Kerbi::Utils::Helm do
     end
   end
 
-  before :each do
-    config.helm_exec = 'helm'
-  end
+  before(:each) { config.helm_exec = 'helm' }
 
   describe '.template' do
     let(:repo) { "https://kubernetes.github.io/dashboard" }

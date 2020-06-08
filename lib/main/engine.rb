@@ -27,9 +27,6 @@ module Kerbi
       end.join("\n")
     end
 
-    def config
-    end
-
     protected
 
     def gen

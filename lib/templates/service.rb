@@ -1,7 +1,8 @@
+require 'base64'
 require_relative 'base'
 
 module Kerbi
-  class ServiceTemplate < Kerbi::Base
+  class ServiceTemplate < Kerbi::Template::Base
     class << self
 
       def port(port_obj)

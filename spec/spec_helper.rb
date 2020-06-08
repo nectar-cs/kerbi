@@ -1,5 +1,6 @@
 require 'tempfile'
 require 'simplecov'
+require_relative './../lib/kerbi'
 
 def tmp_file(content)
   f1 = Tempfile.new

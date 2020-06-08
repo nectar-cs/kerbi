@@ -2,7 +2,7 @@ require_relative 'base'
 
 module Kerbi
   module Template
-    class Deployment < Kerbi::Base
+    class Deployment < Kerbi::Template::Base
 
       class << self
         def container(name:, image:, cmd:, envs:, image_pull_policy:)

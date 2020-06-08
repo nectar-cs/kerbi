@@ -29,7 +29,7 @@ module Kerbi
     #
     def yaml(fname, extras: {}, only: nil, except: nil)
       args = [fname, extras, only, except]
-      self.output << parent.inflate_yaml_file(*args)
+      self.output += parent.inflate_yaml_file(*args)
     end
 
     ##
@@ -73,7 +73,7 @@ module Kerbi
       end
     end
 
-    def mixer(sibling_class, root=self.parent.values)
+    def mixer(sibling_class, root: self.parent.values)
       self.output += sibling_class.new(root).run
     end
 
@@ -81,7 +81,7 @@ module Kerbi
     # Adds a raw hash to the bucket
     # @param [Hash] hash the hash to be added
     def hash(hash)
-      self.output << parent.clean_and_filter_hashes([hash], nil, nil)
+      self.output += parent.clean_and_filter_hashes([hash], nil, nil)
     end
 
     ##

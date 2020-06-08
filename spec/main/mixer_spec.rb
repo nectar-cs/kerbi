@@ -1,5 +1,4 @@
 require_relative './../spec_helper'
-require_relative './../../lib/main/mixer'
 
 RSpec.describe Kerbi::Mixer do
 
@@ -96,7 +95,7 @@ RSpec.describe Kerbi::Mixer do
         file: 'wiz-ci/kerbi-chart/values.yaml'
       }
       actual = subject.inflate_yaml_http(options, nil, nil, {})
-      expect(actual.first.&keys.count).to eq(3)
+      expect(actual.first&.keys.count).to eq(3)
     end
   end
 

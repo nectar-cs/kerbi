@@ -1,9 +1,8 @@
 require_relative './../spec_helper'
-require_relative './../../lib/templates/env_var_template'
 
-RSpec.describe Kerbi::EnvVarTemplate do
+RSpec.describe Kerbi::Template::EnvVar do
 
-  subject { Kerbi::EnvVarTemplate }
+  subject { Kerbi::Template::EnvVar }
 
   describe '.generics' do
     it 'iterates over .generic' do
