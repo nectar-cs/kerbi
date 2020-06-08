@@ -23,13 +23,12 @@ module Kerbi
     # Adds the res-hashes from a YAML/ERB file
     # @param [String] fname simplified or absolute path of file
     # @param [Hash] extras an additional hash available in the ERB context
-    # @param [Array<Hash>] only list of k8s res IDs to whitelist
-    # @param [Array<Hash>] except list of k8s res IDs to blacklist
+    # @param [Array<String>] only list of k8s res IDs to whitelist
+    # @param [Array<String>] except list of k8s res IDs to blacklist
     # @return [void]
     #
     def yaml(fname, extras: {}, only: nil, except: nil)
-      args = [fname, extras, only, except]
-      self.output += parent.inflate_yaml_file(*args)
+      self.output += parent.inflate_yaml_file(fname, only, except, extras)
     end
 
     ##
@@ -52,6 +51,9 @@ module Kerbi
     # @option opts [Array<Hash>] many hashes to apply as patches
     # @option opts [Array<String>] yamls list of simplified/absolute filenames to apply as patches
     # @option opts [String] yamls_in dir name in which all yamls/erbs should be applied as hashes
+    # @yield [bucket] Exec context in which hashes are collected into one bucket
+    # @yieldparam [Kerbi::ResBucket] gp Bucket object with essential methods
+    # @yieldreturn [Array<Hash>] array of hashes representing Kubernetes resources
     # @return [void]
     def patched_with(**opts, &block)
       bucket = self.class.new(self.parent)
@@ -66,7 +68,7 @@ module Kerbi
       end
       patches = (hashes + file_patches + (dir_patches || [])).flatten.compact
 
-      self.output = bucket.output.flatten.map do |res|
+      self.output += bucket.output.flatten.map do |res|
         patches.inject(res) do |whole, patch|
           whole.deep_merge(patch)
         end
@@ -116,7 +118,7 @@ module Kerbi
     # @option opts [Array<String>] except list res-id's to blacklist from results
     # @return [Array<Hash>] list of res-hashes
     def chart(**opts)
-      whitelist, blacklist = opts.delete(:only), opts.delete(:except)
+      whitelist, blacklist = [opts.delete(:only), opts.delete(:except)]
       self.output += self.parent.inflate_helm_output(
         opts, whitelist, blacklist
       )

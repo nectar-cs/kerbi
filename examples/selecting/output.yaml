@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wanted
+annotations:
+  source: resources.yaml
+data:
+  foo: baz
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: should-appear
+annotations:
+  source: other-yamls/wanted.yaml
+data:
+  foo: baz

@@ -1,20 +1,18 @@
 require_relative './../../lib/kerbi'
 
-class PatchingExample < Kerbi::Mixer
+class SelectingExample < Kerbi::Mixer
 
   locate_self __dir__
 
   def run
     super do |g|
-      g.hash({not: 'patched'})
-      g.patched_with yamls_in: './patches' do |patched|
-        patched.yaml 'resources'
-      end
+      g.yaml 'resources', only: ['ConfigMap:wanted']
+      g.yamls in: './other-yamls', except: 'unwanted.yaml'
     end
   end
 end
 
-kerbi.generators = [PatchingExample]
+kerbi.generators = [SelectingExample]
 
 output = kerbi.gen_yaml
 puts output

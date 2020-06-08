@@ -32,10 +32,21 @@ module Kerbi
     # @return [Array<Hash>] array of hashes representing Kubernetes resources
     def run(&block)
       if block_given?
-        bucket = Kerbi::ResBucket.new(self)
-        block.call(bucket)
-        bucket.output.flatten
+        self.run_with_bucket(&block)
       end
+    end
+
+    ##
+    # Where users should return a hash or
+    # an array of hashes representing Kubernetes resources
+    # @yield [bucket] Exec context in which hashes are collected into one bucket
+    # @yieldparam [Kerbi::ResBucket] g Bucket object with essential methods
+    # @yieldreturn [Array<Hash>] array of hashes representing Kubernetes resources
+    # @return [Array<Hash>] array of hashes representing Kubernetes resources
+    def run_with_bucket()
+      bucket = Kerbi::ResBucket.new(self)
+      yield(bucket)
+      bucket.output.flatten
     end
 
     ##

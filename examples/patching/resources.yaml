@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: patches-example
+  annotations:
+    should_be_patched: "it was not"
+    should_not_be_patched: "it was not"
