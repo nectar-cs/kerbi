@@ -7,23 +7,38 @@ steps:
     entrypoint: 'bash'
     args:
       - '-c'
-      - 'echo $(gcloud secrets versions access latest --secret=rubygems-api-key) > rubygems-api-key.txt'
+      - 'echo $(gcloud secrets versions access latest --secret=rubygems-api-key) > rubygems-api-key.txt;
+         echo $(gcloud secrets versions access latest --secret=kerbi-codecov-token) > kerbi-codecov-token.txt;
+        '
 
-  - name: 'gcr.io/cloud-builders/docker'
-    id: 'Run Tests'
+  - id: "Build base image"
+    name: 'gcr.io/cloud-builders/docker'
+    waitFor: []
     args:
       - 'build'
       - '.'
-      - '-f'
-      - 'RunTestsDockerfile'
+      - '-t'
+      - 'kerbi'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Run tests and push coverage'
+    waitFor:
+      - 'Build base image'
+      - 'Fetch Secrets'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - 'docker run kerbi --env CODECOV_TOKEN=$(cat kerbi-codecov-token.txt)'
+    env:
+      - 'VCS_COMMIT_ID=$COMMIT_SHA'
+      - 'VCS_BRANCH_NAME=$BRANCH_NAME'
+      - 'CI_BUILD_ID=$BUILD_ID'
 
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Publish Gem'
     entrypoint: 'bash'
     waitFor:
-      - 'Run Tests'
+      - 'Run tests and push coverage'
     args:
       - '-c'
-      - 'docker build . -f PublishGemDockerfile
-      --build-arg RUBYGEMS_API_KEY=$(cat rubygems-api-key.txt)
-      '
+      - 'docker run kerbi --env RUBYGEMS_API_KEY=$(cat rubygems-api-key.txt)'

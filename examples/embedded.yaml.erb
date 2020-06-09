@@ -1,8 +1,0 @@
-<% require "base64" %>
-<% root = values[:db_secret] %>
-
-kind: Secret
-metadata:
-  name: <%= root[:name] %>
-data:
-  password: <%= Base64.encode64(root[:password]) %>

@@ -1,6 +1,11 @@
 
 # Kerbi
 
+[![codecov](https://codecov.io/gh/nectar-cs/kerbi/branch/master/graph/badge.svg)](https://codecov.io/gh/nectar-cs/kerbi)
+[![Gem Version](https://badge.fury.io/rb/kerbi.svg)](https://badge.fury.io/rb/kerbi)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+
 Kerbi (Kubernetes Emdedded Ruby Interpolator) is yet another templating engine for 
 generating Kubernetes resource manifests. 
 
@@ -40,7 +45,7 @@ class BackendMixer < Kerbi::Mixer
 
       g.patched_with yamls: ['company-annotations'] do |gp|
         gp.mixer ConfigMapMixer, root: self.values[:config]
-        gp.chart id 'bitnami/postgresql' 
+        gp.chart id: 'bitnami/postgresql' 
         gp.github id: 'my-org/k8s', file: 'manifest.yaml'
       end
     end
@@ -99,3 +104,5 @@ puts kerbi.gen_yaml
 ## Getting Started
 
 Read the [documentation](https://nectar-cs.github.io/kerbi/#/getting-started) from Github Pages.
+
+Alternatively, check out the [examples folder].

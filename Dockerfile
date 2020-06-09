@@ -1,10 +1,8 @@
 FROM ruby:2.6.3-alpine3.10
 
-ENV NO_COVERAGE 'true'
-
 WORKDIR /app
 
-RUN apk --update add build-base libxslt-dev libxml2-dev curl
+RUN apk --update add build-base libxslt-dev libxml2-dev curl bash git
 
 RUN curl https://get.helm.sh/helm-v3.1.0-linux-amd64.tar.gz --output helm_bin.tar.gz
 RUN tar -zxvf helm_bin.tar.gz
@@ -18,6 +16,6 @@ RUN gem install bundler && \
      bundle config set without 'development' && \
      bundle install --jobs 20 --retry 5
 
-ADD . ./
+ADD . /app
 
-RUN bundle exec rspec -fd
+ENTRYPOINT ["/app/docker-entry.sh"]

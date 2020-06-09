@@ -1,5 +1,8 @@
 require 'tempfile'
 require 'simplecov'
+
+SimpleCov.start
+
 require_relative './../lib/kerbi'
 
 def tmp_file(content)
@@ -22,6 +25,3 @@ def n_yaml_files(hashes:, more_args: [])
   ARGV.replace(args + more_args)
   subject.load
 end
-
-SimpleCov.start unless ENV['NO_COVERAGE']
-
