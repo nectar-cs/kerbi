@@ -4,31 +4,25 @@
 Kerbi (Kubernetes Emdedded Ruby Interpolator) is yet another templating engine for 
 generating Kubernetes resource manifests. 
 
-You create manifests by mixing different templating strategies, and
-different manifest sources, all under one roof.
+It enables multi-strategy, multi-source templating, giving you the freedom
+to design highly specialized templating pipelines.  
 
-**Templating strategies**:
-- embedding values and code into YAML files (e.g [Helm](https://github.com/helm/helm))
-- patching and overlaying YAML/objects (e.g [kustomize](https://github.com/kubernetes-sigs/kustomize))
-- serializing YAML from in-memory objects (e.g [jsonnet](https://github.com/google/jsonnet))
+**Features**:
+- **Templating strategies**
+  - embedding values and code into YAML files (e.g [Helm](https://github.com/helm/helm))
+  - patching and overlaying YAML/objects (e.g [kustomize](https://github.com/kubernetes-sigs/kustomize))
+  - serializing YAML from in-memory objects (e.g [jsonnet](https://github.com/google/jsonnet))
+- **Manifest sources**
+  - `yaml`
+  - `yaml.erb`
+  - `helm` charts
+  - `github` files
+  - `ruby` objects
+- **Values**
+  - Helm-like `values.yaml`, `-f special-values.yaml`, and inline `--set foo.bar=baz`
+  - Integrated environment logic à la Kustomize, e.g `-e production`
 
-**Manifest sources**:
-- YAML
-- ERB (ruby-embedded YAML)
-- Helm charts
-- Files on GitHub
-- Ruby hashes
-
-Can mixing sources and strategies lead to abominable anti-patterns? Absolutely. But 
-Kerbi is designed only to enable. 
-
-### Features
-- Seamless mixing of `yaml`, `yaml.erb`, github files, `helm` charts, and in-memory objects
-- Helm-like `values.yaml`, `-f special-values.yaml`, and inline assignments `--set foo.bar=baz`
-- Integrated environment logic à la Kustomize, like `-e production`
-- Total freedom in project directory structure 
-
-### Non-Features
+**Non-Features**:
 - Release management à la Helm, packaging, or any kind of manifest versioning
 - Interfacing with Kubernetes clusters, building images, syncing, etc... Kerbi just outputs yaml 
 
@@ -70,7 +64,7 @@ data:
 ## How it works
 
 Kerbi generates YAML from other YAMLs, [ERBs](https://www.stuartellis.name/articles/erb/), 
-and Ruby files. As a user, you write `Gen` Ruby classes
+and Ruby files. As a user, you write `Kerbi::Mixer` Ruby classes
 to orchestrate the templating.  
 
 <p align="center">
@@ -78,24 +72,19 @@ to orchestrate the templating.
 </p>
 
 Conceptually, Kerbi is most similar to Helm. You create a `values.yaml` file and 
-`charts`. Except that in Kerbi, a) charts are programmatic `generators` that can do
-a lot more, and b) there is no required directory structure.
+dynamic manifest files that consume them:
 
 
 ```ruby
 class BarMixer < Kerbi::Mixer
   def run
-    super do |g|
-      g.hash foo: 'bar'
-    end
+    super {|g|g.hash foo: 'bar'}
   end 
 end
 
 class BazMixer < Kerbi::Mixer
   def run
-    super do |g|
-      g.hash foo: 'baz'
-    end
+    super {|g|g.hash foo: 'baz'}
   end 
 end
 
@@ -109,4 +98,4 @@ puts kerbi.gen_yaml
 
 ## Getting Started
 
-Read the [documentation](https://nectar-cs.github.io/kerbi/getting-started) from Github Pages 
+Read the [documentation](https://nectar-cs.github.io/kerbi/#/getting-started) from Github Pages.
