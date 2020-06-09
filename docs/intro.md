@@ -109,4 +109,4 @@ Yields:
 
 Read the [documentation](https://nectar-cs.github.io/kerbi/#/getting-started) from Github Pages.
 
-Alternatively, check out the [examples folder].
+Alternatively, check out the [examples folder](https://github.com/nectar-cs/kerbi/tree/master/examples).
