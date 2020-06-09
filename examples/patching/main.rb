@@ -6,7 +6,7 @@ class PatchingExample < Kerbi::Mixer
 
   def run
     super do |g|
-      g.hash({not: 'patched'})
+      g.hash({should_not_be_patched: "it was not"})
       g.patched_with yamls_in: './patches' do |patched|
         patched.yaml 'resources'
       end

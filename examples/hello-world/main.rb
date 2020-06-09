@@ -3,10 +3,14 @@ require_relative './../../lib/kerbi'
 class HelloWorldMixer < Kerbi::Mixer
   def run
     super do |g|
-      g.hash hello: "I am #{values[:status] || "almost"} templating with Kerbi"
+      message = values[:status] || "almost"
+      g.hash({hello: "I am #{message} templating with Kerbi"})
     end
   end
 end
 
 kerbi.generators = [ HelloWorldMixer ]
-puts kerbi.gen_yaml
+
+output = kerbi.gen_yaml
+puts output
+File.open("#{__dir__}/output.yaml", "w") { |f| f.write(output) }

@@ -126,10 +126,33 @@ end
 ```
 
 The `g.yaml` method also accepts an `extra` hash that allows for 
-last minute customization.
+last minute customization:
+
+```ruby
+class YamlMixerWithExtras < Kerbi::Mixer
+  def run
+    super do |g|
+      g.yaml 'namespace', extras: { owner: 'jack' }
+    end
+  end
+end
+```
+
+The extras hash can be accessed in ERB as a hash:
+
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: "<%= extras[:owner] %>-devspace"
+```
 
 Comprehensive method 
 [documentation](https://www.rubydoc.info/gems/kerbi/Kerbi/ResBucket#yaml-instance_method).
+
+
+
+
 
 
 ## Loading YAMLS from a directory
@@ -412,7 +435,7 @@ require_relative 'invoked_mixer.rb'
 class InvokingMixer < Kerbi::Mixer
   def run
     super do |g|
-      g.mixer InvokedMixer, values: { foo: 'bar' }
+      g.mixer InvokedMixer, root: { foo: 'bar' }
     end    
   end  
 end

@@ -18,11 +18,11 @@ class HelmChartExample < Kerbi::Mixer
         only: ['PersistentVolumeClaim:example-postgresql']
       )
 
-      g.hashes self.modified_helm_chart
+      g.hashes self.modified_mysql_chart
     end
   end
 
-  def modified_helm_chart
+  def modified_mysql_chart
     my_sql_resources = self.run_with_bucket do |g|
       g.chart id: 'stable/mysql', only: ['ConfigMap:kerbi-mysql-test']
     end

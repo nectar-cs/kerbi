@@ -71,7 +71,7 @@ module Kerbi
     # @param [Hash] extras an additional hash available to ERB
     # @return [String] original yaml_str interpolated with instance binding
     def interpolate_erb_string(yaml_str, extras)
-      binding.local_variable_set(:extras, extras)
+      binding.local_variable_set(:extras, extras || {})
       ERB.new(yaml_str).result(binding)
     end
 
@@ -150,10 +150,10 @@ module Kerbi
 
     ##
     # Finds all .yaml and .yaml.erb files in a directory
-    # @param [String, dir] dir relative or absolute path of the directory
+    # @param [String] dir relative or absolute path of the directory
     # @param [Array<String>] file_blacklist list of filenames to avoid
     # @return [Array<Hash>] array of processed hashes
-    def inflate_yamls_in_dir(dir=nil, file_blacklist=nil)
+    def inflate_yamls_in_dir(dir, file_blacklist, extras)
       dir ||= pwd
       blacklist = file_blacklist || []
 
@@ -164,7 +164,7 @@ module Kerbi
       (yaml_files + erb_files).map do |fname|
         is_blacklisted = blacklist.include?(File.basename(fname))
         unless is_blacklisted
-          self.inflate_yaml_file(fname, nil, nil, {})
+          self.inflate_yaml_file(fname, nil, nil, extras)
         end
 
       end.compact.flatten

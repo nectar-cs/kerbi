@@ -39,7 +39,7 @@ module Kerbi
     # @return [void]
     def yamls(**opts)
       dir, blacklist = opts.slice(:in, :except).values
-      self.output += self.parent.inflate_yamls_in_dir(dir, [blacklist].compact)
+      self.output += self.parent.inflate_yamls_in_dir(dir, [blacklist].compact, nil)
     end
 
     ##
@@ -62,7 +62,7 @@ module Kerbi
       hashes = opts[:hashes] || [opts[:hash]]
       yamls_in = opts.has_key?(:yamls_in) && opts[:yamls_in]
       #noinspection RubyYardParamTypeMatch
-      dir_patches = yamls_in && self.parent.inflate_yamls_in_dir(yamls_in)
+      dir_patches = yamls_in && self.parent.inflate_yamls_in_dir(yamls_in, [], {})
       file_patches = (opts[:yamls] || []).map do |f|
         parent.inflate_yaml_file(f, nil, nil, {})
       end
