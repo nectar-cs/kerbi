@@ -31,6 +31,10 @@ to design highly specialized templating pipelines.
 - Release management à la Helm, packaging, or any kind of manifest versioning
 - Interfacing with Kubernetes clusters, building images, syncing, etc... Kerbi just outputs yaml 
 
+<p align="center">
+  <img src='Kerbi-engine.png'></img>
+</p>
+
 ## How it looks
 
 Kerbi lets you write programmatic mixers in Ruby to orchestrate complex (or silly) templating logic:    
@@ -72,10 +76,6 @@ Kerbi generates YAML from other YAMLs, [ERBs](https://www.stuartellis.name/artic
 and Ruby files. As a user, you write `Kerbi::Mixer` Ruby classes
 to orchestrate the templating.  
 
-<p align="center">
-  <img src='Kerbi-engine.png'></img>
-</p>
-
 Conceptually, Kerbi is most similar to Helm. You create a `values.yaml` file and 
 dynamic manifest files that consume them:
 
@@ -93,9 +93,13 @@ class BazMixer < Kerbi::Mixer
   end 
 end
 
-
 kerbi.generators = [ BarMixer, BazMixer ]
 puts kerbi.gen_yaml 
+```
+
+Yields:
+
+```yaml
 # => foo: bar 
 # => ---
 # => foo: baz
