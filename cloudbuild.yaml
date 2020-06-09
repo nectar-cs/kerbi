@@ -28,7 +28,7 @@ steps:
     entrypoint: 'bash'
     args:
       - '-c'
-      - 'docker run kerbi --env CODECOV_TOKEN=$(cat kerbi-codecov-token.txt)'
+      - 'docker run kerbi test --env CODECOV_TOKEN=$(cat kerbi-codecov-token.txt)'
     env:
       - 'VCS_COMMIT_ID=$COMMIT_SHA'
       - 'VCS_BRANCH_NAME=$BRANCH_NAME'
@@ -41,4 +41,4 @@ steps:
       - 'Run tests and push coverage'
     args:
       - '-c'
-      - 'docker run kerbi --env RUBYGEMS_API_KEY=$(cat rubygems-api-key.txt)'
+      - 'docker run kerbi publish --env RUBYGEMS_API_KEY=$(cat rubygems-api-key.txt)'
