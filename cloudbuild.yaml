@@ -2,8 +2,8 @@
 steps:
 
   - id: "Fetch Secrets"
-    waitFor: []
     name: gcr.io/cloud-builders/gcloud
+    waitFor: []
     entrypoint: 'bash'
     args:
       - '-c'
@@ -20,19 +20,26 @@ steps:
       - '-t'
       - 'kerbi'
 
-  - name: 'gcr.io/cloud-builders/docker'
-    id: 'Run tests and push coverage'
+  - id: 'Run tests and push coverage'
+    name: 'gcr.io/cloud-builders/docker'
     waitFor:
       - 'Build base image'
       - 'Fetch Secrets'
     entrypoint: 'bash'
     args:
       - '-c'
-      - 'docker run kerbi test --env CODECOV_TOKEN=$(cat kerbi-codecov-token.txt)'
-    env:
-      - 'VCS_COMMIT_ID=$COMMIT_SHA'
-      - 'VCS_BRANCH_NAME=$BRANCH_NAME'
-      - 'CI_BUILD_ID=$BUILD_ID'
+      - 'echo debug;
+      echo commit "$COMMIT_SHA";
+      echo branch "$BRANCH_NAME";
+      echo build "$BUILD_ID";
+      docker run
+        --env CODECOV_TOKEN="$(cat kerbi-codecov-token.txt)"
+        --env VCS_COMMIT_ID="$COMMIT_SHA"
+        --env VCS_BRANCH_NAME="$BRANCH_NAME"
+        --env CI_BUILD_ID="$BUILD_ID"
+        --env CODECOV_TOKEN="$(cat kerbi-codecov-token.txt)"
+        kerbi test
+      '
 
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Publish Gem'
@@ -41,4 +48,4 @@ steps:
       - 'Run tests and push coverage'
     args:
       - '-c'
-      - 'docker run kerbi publish --env RUBYGEMS_API_KEY=$(cat rubygems-api-key.txt)'
+      - 'docker run --env RUBYGEMS_API_KEY=$(cat rubygems-api-key.txt) kerbi publish'
