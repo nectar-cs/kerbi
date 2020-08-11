@@ -27,6 +27,25 @@ module Kerbi
       end.join("\n")
     end
 
+    def values_yaml
+      YAML.dump(self.values.deep_stringify_keys)
+    end
+
+    ##
+    # Tami-adherent CLI arg routing
+    # @return [void] Prints any output to stdout
+    def cli_exec
+      command = ARGV.first
+      if %w[t template].include?(command)
+        puts self.gen_yaml
+      elsif %w[v values].include?(command)
+        puts self.values_yaml
+      else
+        puts "Unrecognized command #{command}"
+        exit 1
+      end
+    end
+
     protected
 
     def gen
