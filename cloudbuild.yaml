@@ -1,7 +1,3 @@
-images:
-  - gcr.io/nectar-bazaar/kerbi
-
-
 steps:
 
   - id: "Fetch Secrets"

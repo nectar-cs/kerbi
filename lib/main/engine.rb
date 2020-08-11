@@ -40,6 +40,8 @@ module Kerbi
         puts self.gen_yaml
       elsif %w[v values].include?(command)
         puts self.values_yaml
+      elsif %w[sleep].include?(command)
+        tami_sleep
       else
         puts "Unrecognized command #{command}"
         exit 1
@@ -62,4 +64,10 @@ end
 # @return [Kerbi::Engine] singleton instance of Kerbi::App
 def kerbi
   $kerbi ||= Kerbi::Engine.new
+end
+
+def tami_sleep
+  while true
+    sleep 10
+  end
 end
