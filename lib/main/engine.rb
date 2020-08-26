@@ -28,7 +28,8 @@ module Kerbi
     end
 
     def values_yaml
-      YAML.dump(self.values.deep_stringify_keys)
+      raw = YAML.dump(self.values.deep_stringify_keys)
+      raw.gsub("---\n", '')
     end
 
     ##
