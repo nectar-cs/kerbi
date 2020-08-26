@@ -25,7 +25,7 @@ RSpec.describe Kerbi::Engine do
       it 'prints the values YAML' do
         subject.generators = [MixerA, MixerB]
         ARGV.replace(%w[v --set x=y])
-        expect { subject.cli_exec }.to output("---\nx: y\n").to_stdout
+        expect { subject.cli_exec }.to output("x: y\n").to_stdout
       end
     end
   end
