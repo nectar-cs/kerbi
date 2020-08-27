@@ -1,6 +1,7 @@
 require 'active_support/core_ext/hash/keys'
 require 'active_support/core_ext/hash/deep_merge'
 require 'yaml'
+require 'json'
 require 'erb'
 
 module Kerbi
@@ -32,8 +33,10 @@ module Kerbi
           "values/#{fname}",
           "values/#{fname}.yaml.erb",
           "values/#{fname}.yaml",
+          "values/#{fname}.json",
           "#{fname}.yaml.erb",
           "#{fname}.yaml",
+          "#{fname}.json",
         ]
       end
 
@@ -49,7 +52,15 @@ module Kerbi
       def read_values_file(fname)
         file_cont = File.read(fname) rescue nil
         return {} unless file_cont
-        YAML.load(file_cont).deep_symbolize_keys
+        load_json(file_cont) || load_yaml(file_cont) || {}
+      end
+
+      def load_yaml(file_cont)
+        YAML.load(file_cont).deep_symbolize_keys rescue nil
+      end
+
+      def load_json(file_cont)
+        JSON.parse(file_cont.deep_symbolize_keys) rescue nil
       end
 
       def read_arg_assignments

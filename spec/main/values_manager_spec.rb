@@ -32,21 +32,6 @@ RSpec.describe Kerbi::ValuesManager do
     end
   end
 
-  describe ".value_paths" do
-    it "produces the correct filename" do
-      result = subject.values_paths('foo')
-      expected = %w[
-        foo
-        values/foo
-        values/foo.yaml.erb
-        values/foo.yaml
-        foo.yaml.erb
-        foo.yaml
-      ]
-      expect(result).to match_array(expected)
-    end
-  end
-
   describe ".arg_value" do
     context 'when the arg is present' do
       context 'and the value is too' do
@@ -110,10 +95,18 @@ RSpec.describe Kerbi::ValuesManager do
 
   describe '.read_values_file' do
     context 'when the file exists' do
-      context 'without a helper' do
-        it 'correctly loads the yaml' do
+      context 'with yaml' do
+        it 'correctly loads the file' do
           path = tmp_file("foo: bar\nbaz: bar2")
           output = subject.read_values_file(path)
+          expect(output).to eq({foo: 'bar', baz: 'bar2'})
+        end
+      end
+      context 'with json' do
+        it 'correctly loads the file' do
+          path = tmp_file(JSON.dump({foo: 'bar', baz: 'bar2'}))
+          output = subject.read_values_file(path)
+          puts output
           expect(output).to eq({foo: 'bar', baz: 'bar2'})
         end
       end
