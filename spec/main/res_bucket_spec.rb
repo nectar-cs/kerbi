@@ -24,8 +24,8 @@ RSpec.describe Kerbi::ResBucket do
   describe '#github' do
     it 'outputs the correct hash list' do
       subject.github(
-        id: 'nectar-cs/charts-and-wizards',
-        file: 'wiz-ci/kerbi-chart/values.yaml'
+        id: 'nectar-cs/nectarines',
+        file: 'wiz-ci/kerbi/values.yaml'
       )
       expect(subject.output.first&.keys.count).to eq(3)
     end

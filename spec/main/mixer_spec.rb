@@ -91,8 +91,8 @@ RSpec.describe Kerbi::Mixer do
     it 'returns the correct list of hashes' do
       options = {
         from: 'github',
-        project: 'nectar-cs/charts-and-wizards',
-        file: 'wiz-ci/kerbi-chart/values.yaml'
+        project: 'nectar-cs/nectarines',
+        file: 'wiz-ci/kerbi/values.yaml'
       }
       actual = subject.inflate_yaml_http(options, nil, nil, {})
       expect(actual.first&.keys.count).to eq(3)
