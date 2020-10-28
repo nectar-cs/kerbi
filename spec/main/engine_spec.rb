@@ -16,7 +16,7 @@ RSpec.describe Kerbi::Engine do
     context 'with template cmd' do
       it 'prints the template YAML' do
         subject.generators = [MixerA, MixerB]
-        ARGV.replace(['t'])
+        ARGV.replace(['template'])
         expect { subject.cli_exec }.to output(YAML_OUT).to_stdout
       end
     end
@@ -24,7 +24,7 @@ RSpec.describe Kerbi::Engine do
     context 'with values cmd' do
       it 'prints the values YAML' do
         subject.generators = [MixerA, MixerB]
-        ARGV.replace(%w[v --set x=y])
+        ARGV.replace(%w[values --set x=y])
         expect { subject.cli_exec }.to output("x: y\n").to_stdout
       end
     end
@@ -38,6 +38,23 @@ RSpec.describe Kerbi::Engine do
     end
   end
 
+  describe '#gen' do
+    context 'with --only filters' do
+
+      let(:expected) do
+        [
+          {:kind=>"kind-1", :metadata=>{:name=>"name-1"}},
+          {:kind=>"kind-2", :metadata=>{:name=>"name-2"}}
+        ]
+      end
+
+      it 'selects only the requested resources' do
+        subject.generators = [MixerC]
+        ARGV.replace(%w[--only kind-1:name-1 --only kind-2:name-2])
+        expect(subject.gen).to eq(expected)
+      end
+    end
+  end
 end
 
 class MixerA < Kerbi::Mixer
@@ -49,6 +66,25 @@ end
 class MixerB < Kerbi::Mixer
   def run
     [{b: 'b'}, {a: 'a2'}]
+  end
+end
+
+class MixerC < Kerbi::Mixer
+  def run
+    [
+      {
+        kind: 'kind-1',
+        metadata: { name: 'name-1' }
+      },
+      {
+        kind: 'kind-1',
+        metadata: { name: 'name-2' }
+      },
+      {
+        kind: 'kind-2',
+        metadata: { name: 'name-2' }
+      }
+    ]
   end
 end
 

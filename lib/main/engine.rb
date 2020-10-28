@@ -17,6 +17,11 @@ module Kerbi
       @_values ||= ValuesManager.load
     end
 
+    def arg_values(name)
+      indicies = ARGV.each_index.select { |i| ARGV[i]==name }
+      indicies.map { |key_index| ARGV[key_index + 1] }
+    end
+
     ##
     # Serializes all generators' outputs into a YAML string
     # @return [String] YAML string of all generator-produced resources
@@ -49,19 +54,32 @@ module Kerbi
       end
     end
 
-    protected
-
     def gen
-      self.generators.inject([]) do |whole, gen_class|
+      res_defs = self.generators.inject([]) do |whole, gen_class|
         generator = gen_class.new(values)
         whole + generator.run.flatten
       end
+
+      if (filters = arg_values('--only')).any?
+        res_defs = res_defs.select do |res_def|
+          res_def = res_def.deep_symbolize_keys
+          kind = res_def[:kind]
+          name = res_def.dig(:metadata, :name)
+          positive_filters = filters.select do |filter|
+            against_kind, against_name = filter.split(":")
+            against_kind == kind && against_name == name
+          end
+          positive_filters.any?
+        end
+      end
+      res_defs
     end
   end
 end
 
 ##
-# The singleton Kerbi::Engine, where the user can add generators invoke invoke the templating engine
+# The singleton Kerbi::Engine, where the user can add
+# generators invoke invoke the templating engine
 # @return [Kerbi::Engine] singleton instance of Kerbi::App
 def kerbi
   $kerbi ||= Kerbi::Engine.new
