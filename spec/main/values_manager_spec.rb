@@ -11,6 +11,36 @@ RSpec.describe Kerbi::ValuesManager do
     end
   end
 
+  describe ".read_release_name" do
+    context 'without the arg' do
+      context 'when the main cmd is the last word' do
+        it 'returns nil' do
+          ARGV.replace %w[main_command]
+          expect(subject.read_release_name).to be_nil
+        end
+      end
+      context "when a '--x' or '-x' succeeds the main cmd" do
+        it 'returns nil' do
+          ARGV.replace %w[main_command -an-arg]
+          expect(subject.read_release_name).to be_nil
+
+          ARGV.replace %w[main_command --an-arg]
+          expect(subject.read_release_name).to be_nil
+        end
+      end
+    end
+
+    context 'with a word no preceeded by a -x arg' do
+      it 'overwrites the default namespace/release_name' do
+        ARGV.replace %w[main_command foo-release]
+        expect(subject.read_release_name.values).to eq(['foo-release'])
+
+        ARGV.replace %w[main_command foo-release -an-arg]
+        expect(subject.read_release_name.values).to eq(['foo-release'])
+      end
+    end
+  end
+
   describe ".read_arg_values" do
     context "when --set flags are passed" do
       context "without nil conflicts" do
@@ -149,6 +179,12 @@ RSpec.describe Kerbi::ValuesManager do
           ]
         )
         expect(result).to eq({a: 1, b: { b: 2, c: 3 }})
+      end
+
+      it 'merges correctly with a release name' do
+        ARGV.replace(%w[main foo-rel --set foo=bar])
+        expect = {foo: "bar", release_name: "foo-rel"}
+        expect(Kerbi::ValuesManager.load).to eq(expect)
       end
     end
   end

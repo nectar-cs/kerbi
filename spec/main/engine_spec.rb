@@ -28,6 +28,12 @@ RSpec.describe Kerbi::Engine do
         expect { subject.cli_exec }.to output("x: y\n").to_stdout
       end
     end
+
+    context 'with an explicit release name' do
+      it 'overwrites the default namespace/release_name' do
+
+      end
+    end
   end
 
   describe '#gen_yaml' do
@@ -50,7 +56,7 @@ RSpec.describe Kerbi::Engine do
 
       it 'selects only the requested resources' do
         subject.generators = [MixerC]
-        ARGV.replace(%w[--only kind-1:name-1 --only kind-2:name-2])
+        ARGV.replace(%w[foo --only kind-1:name-1 --only kind-2:name-2])
         expect(subject.gen).to eq(expected)
       end
     end

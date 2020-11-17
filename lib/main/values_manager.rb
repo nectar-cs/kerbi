@@ -1,5 +1,6 @@
 require 'active_support/core_ext/hash/keys'
 require 'active_support/core_ext/hash/deep_merge'
+require 'active_support/core_ext/object/blank'
 require 'yaml'
 require 'json'
 require 'erb'
@@ -71,12 +72,21 @@ module Kerbi
         end
       end
 
+      def read_release_name
+        if (release_name = (ARGV[1])).present?
+          unless release_name.start_with?("-")
+            { release_name: release_name }
+          end
+        end
+      end
+
       def load
         result = all_values_paths.inject({}) do |whole, file_name|
           whole.
             deep_merge(read_values_file(file_name)).
             deep_merge(read_arg_assignments)
         end
+        result = result.merge(self.read_release_name || {})
         result.deep_symbolize_keys
       end
     end
