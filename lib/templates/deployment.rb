@@ -8,11 +8,11 @@ module Kerbi
         def container(name:, image:, cmd:, envs:, image_pull_policy:)
           cmd = cmd.split(' ') unless cmd.is_a?(Array)
           {
-            name: name,
+            name: name || 'main',
             image: image,
-            imagePullPolicy: image_pull_policy,
-            command: cmd,
-            env: envs
+            imagePullPolicy: image_pull_policy || 'IfNotPresent',
+            command: cmd || '',
+            env: envs || []
           }
         end
 
