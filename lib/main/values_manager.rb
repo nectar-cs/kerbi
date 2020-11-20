@@ -57,7 +57,12 @@ module Kerbi
       end
 
       def load_yaml(file_cont)
-        YAML.load(file_cont).deep_symbolize_keys rescue nil
+        begin
+          interpolated = ERB.new(file_cont).result
+          YAML.load(interpolated).deep_symbolize_keys rescue nil
+        rescue
+          nil
+        end
       end
 
       def load_json(file_cont)

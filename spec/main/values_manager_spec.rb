@@ -124,6 +124,20 @@ RSpec.describe Kerbi::ValuesManager do
   end
 
   describe '.read_values_file' do
+    describe 'interpolation' do
+      it 'interpolates erb with primitives' do
+        path = tmp_file("foo: bar\nbaz: <%= 1 %>")
+        output = subject.read_values_file(path)
+        expect(output).to eq({foo: 'bar', baz: 1})
+      end
+
+      # it 'interpolates erb with ENVs' do
+      #   path = tmp_file("foo: bar\nbaz: <%= ENV['EDITOR'] %>")
+      #   output = subject.read_values_file(path)
+      #   expect(output).to eq({foo: 'bar', baz: 'test'})
+      # end
+    end
+
     context 'when the file exists' do
       context 'with yaml' do
         it 'correctly loads the file' do
