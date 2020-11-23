@@ -13,30 +13,23 @@ RSpec.describe Kerbi::ValuesManager do
 
   describe ".read_release_name" do
     context 'without the arg' do
-      context 'when the main cmd is the last word' do
+      context 'when the main cmd is not template' do
         it 'returns nil' do
-          ARGV.replace %w[main_command]
+          ARGV.replace %w[not-template foo]
           expect(subject.read_release_name).to be_nil
         end
       end
-      context "when a '--x' or '-x' succeeds the main cmd" do
-        it 'returns nil' do
-          ARGV.replace %w[main_command -an-arg]
-          expect(subject.read_release_name).to be_nil
-
-          ARGV.replace %w[main_command --an-arg]
-          expect(subject.read_release_name).to be_nil
+      context "when template is the main command" do
+        it 'returns the word following template' do
+          ARGV.replace %w[template foo -an-arg]
+          expect(subject.read_release_name).to eq("foo")
         end
-      end
-    end
 
-    context 'with a word no preceeded by a -x arg' do
-      it 'overwrites the default namespace/release_name' do
-        ARGV.replace %w[main_command foo-release]
-        expect(subject.read_release_name.values).to eq(['foo-release'])
-
-        ARGV.replace %w[main_command foo-release -an-arg]
-        expect(subject.read_release_name.values).to eq(['foo-release'])
+        it 'still parses args correctly' do
+          ARGV.replace %w[template foo --set bar=baz]
+          expect = {bar: "baz", release_name: "foo"}
+          expect(Kerbi::ValuesManager.load).to eq(expect)
+        end
       end
     end
   end
@@ -130,12 +123,6 @@ RSpec.describe Kerbi::ValuesManager do
         output = subject.read_values_file(path)
         expect(output).to eq({foo: 'bar', baz: 1})
       end
-
-      # it 'interpolates erb with ENVs' do
-      #   path = tmp_file("foo: bar\nbaz: <%= ENV['EDITOR'] %>")
-      #   output = subject.read_values_file(path)
-      #   expect(output).to eq({foo: 'bar', baz: 'test'})
-      # end
     end
 
     context 'when the file exists' do
@@ -196,7 +183,7 @@ RSpec.describe Kerbi::ValuesManager do
       end
 
       it 'merges correctly with a release name' do
-        ARGV.replace(%w[main foo-rel --set foo=bar])
+        ARGV.replace(%w[template foo-rel --set foo=bar])
         expect = {foo: "bar", release_name: "foo-rel"}
         expect(Kerbi::ValuesManager.load).to eq(expect)
       end

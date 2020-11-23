@@ -78,10 +78,8 @@ module Kerbi
       end
 
       def read_release_name
-        if (release_name = (ARGV[1])).present?
-          unless release_name.start_with?("-")
-            { release_name: release_name }
-          end
+        if ARGV[0] == 'template'
+          ARGV[1]
         end
       end
 
@@ -91,7 +89,7 @@ module Kerbi
             deep_merge(read_values_file(file_name)).
             deep_merge(read_arg_assignments)
         end
-        result = result.merge(self.read_release_name || {})
+        result.merge!(release_name: read_release_name) if read_release_name
         result.deep_symbolize_keys
       end
     end

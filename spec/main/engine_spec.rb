@@ -28,12 +28,6 @@ RSpec.describe Kerbi::Engine do
         expect { subject.cli_exec }.to output("x: y\n").to_stdout
       end
     end
-
-    context 'with an explicit release name' do
-      it 'overwrites the default namespace/release_name' do
-
-      end
-    end
   end
 
   describe '#gen_yaml' do

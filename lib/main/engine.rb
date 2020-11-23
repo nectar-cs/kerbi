@@ -42,12 +42,10 @@ module Kerbi
     # @return [void] Prints any output to stdout
     def cli_exec
       command = ARGV.first
-      if %w[t template].include?(command)
+      if ARGV[0] == 'template'
         puts self.gen_yaml
-      elsif %w[v values].include?(command)
+      elsif ARGV[0..1] == %w[show values]
         puts self.values_yaml
-      elsif %w[sleep].include?(command)
-        tami_sleep
       else
         puts "Unrecognized command #{command}"
         exit 1
