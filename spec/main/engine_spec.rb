@@ -16,7 +16,7 @@ RSpec.describe Kerbi::Engine do
     context 'with template cmd' do
       it 'prints the template YAML' do
         subject.generators = [MixerA, MixerB]
-        ARGV.replace(['template'])
+        ARGV.replace(%w[template foo])
         expect { subject.cli_exec }.to output(YAML_OUT).to_stdout
       end
     end
@@ -24,7 +24,7 @@ RSpec.describe Kerbi::Engine do
     context 'with values cmd' do
       it 'prints the values YAML' do
         subject.generators = [MixerA, MixerB]
-        ARGV.replace(%w[values --set x=y])
+        ARGV.replace(%w[show values --set x=y])
         expect { subject.cli_exec }.to output("x: y\n").to_stdout
       end
     end
