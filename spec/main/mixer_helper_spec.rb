@@ -5,8 +5,16 @@ RSpec.describe Kerbi::MixerHelper do
   subject { Kerbi::Mixer.new({}) }
 
   describe '#b64enc' do
-    it 'returns the base64 encoding' do
-      expect(subject.b64enc('demo')).to eq("ZGVtbw==")
+    context 'when the value is truthy' do
+      it 'returns the base64 encoding' do
+        expect(subject.b64enc('demo')).to eq("ZGVtbw==")
+      end
+    end
+    context 'when the value is blank or nil' do
+      it 'returns an empty string' do
+        expect(subject.b64enc('')).to eq('')
+        expect(subject.b64enc(nil)).to eq('')
+      end
     end
   end
 
