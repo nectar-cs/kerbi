@@ -15,6 +15,12 @@ module Kerbi
         assignment.deep_symbolize_keys
       end
 
+      def file_assign_to_h(str_assign)
+        key_expr, fname = str_assign.split("=")
+        file_contents = File.read(fname)
+        str_assign_to_h("#{key_expr}=#{file_contents}")
+      end
+
       def arg_values(name)
         indicies = ARGV.each_index.select { |i| ARGV[i]==name }
         indicies.map { |key_index| ARGV[key_index + 1] }
@@ -77,6 +83,14 @@ module Kerbi
         end
       end
 
+      def read_arg_file_assignments
+        str_assignments = arg_values("--set-from-file")
+        str_assignments.inject({}) do |whole, file_assignment|
+          assignment = file_assign_to_h(file_assignment)
+          whole.deep_merge(assignment)
+        end
+      end
+
       def read_release_name
         if ARGV[0] == 'template'
           ARGV[1]
@@ -87,7 +101,8 @@ module Kerbi
         result = all_values_paths.inject({}) do |whole, file_name|
           whole.
             deep_merge(read_values_file(file_name)).
-            deep_merge(read_arg_assignments)
+            deep_merge(read_arg_assignments).
+            deep_merge(read_arg_file_assignments)
         end
         result.merge!(release_name: read_release_name) if read_release_name
         result.deep_symbolize_keys

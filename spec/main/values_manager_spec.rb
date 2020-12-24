@@ -11,6 +11,15 @@ RSpec.describe Kerbi::ValuesManager do
     end
   end
 
+  describe ".file_assign_to_h" do
+    it "returns the right hash" do
+      file_contents = "some\nnasty;text"
+      fname = tmp_file(file_contents)
+      result = subject.file_assign_to_h("foo.bar=#{fname}")
+      expect(result).to eq({foo: {bar: file_contents}})
+    end
+  end
+
   describe ".read_release_name" do
     context 'without the arg' do
       context 'when the main cmd is not template' do

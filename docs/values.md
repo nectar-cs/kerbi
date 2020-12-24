@@ -46,7 +46,8 @@ Passing the `-e <env-name>` command-line flag tells Kerbi to look for the matchi
 the same search logic as before:
 
 ```bash
-├───<env-name>.yaml
+├───<env-name>.
+
 ├───<env-name>.yaml.erb
 ├───values
 │   ├───<env-name>.yaml
@@ -64,7 +65,7 @@ arg_value('-e') || ENV['KERBI_ENV'] || 'development'
 Additional value files may be specified by commandline with the `-f <fname>` flag: 
 
 ```bash
-ruby main.rb -f some-client -f some-region.yaml
+ruby main.rb template foo -f some-client -f some-region.yaml
 ```
 
 Notice that Kerbi will again try to infer the full name of the file based `fname` by
@@ -84,15 +85,24 @@ trying:
 
 ## Inline Value Assignments
 
-Finally, Kerbi supports commandline assignments given inline by `--set foo:bar`.
+Finally, Kerbi supports commandline assignments given inline by `--set foo=bar`.
 
 For nested keys, use `.` to designate levels of nesting. So:
 
 ```bash
-ruby main.rb --set networking.ingress.enabled:true
+ruby main.rb template foo --set networking.ingress.enabled=true
 ```
 
 This is useful for keeping sensitive values out of version control.
+
+## Printing out Values
+
+Use the same `show values` command you would use in Helm:
+```bash
+ruby main.rb show values
+```
+
+This is a good way to debug templating issues.
 
 ## Next
 

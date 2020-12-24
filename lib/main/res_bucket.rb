@@ -106,6 +106,10 @@ module Kerbi
       self.output += parent.inflate_yaml_http(params, only, except, {})
     end
 
+    def tam_api(url, deep_root_key)
+
+    end
+
     ##
     # Runs the helm template command
     # @param [Hash] opts kwargs

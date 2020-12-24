@@ -81,28 +81,28 @@ dynamic manifest files that consume them:
 
 
 ```ruby
+class FooMixer < Kerbi::Mixer
+  def run
+    super {|g|g.hash foo: 'foo'}
+  end 
+end
+
 class BarMixer < Kerbi::Mixer
   def run
-    super {|g|g.hash foo: 'bar'}
+    super {|g|g.hash foo: values[:release_name]}
   end 
 end
 
-class BazMixer < Kerbi::Mixer
-  def run
-    super {|g|g.hash foo: 'baz'}
-  end 
-end
-
-kerbi.generators = [ BarMixer, BazMixer ]
+kerbi.generators = [ FooMixer, BarMixer ]
 puts kerbi.gen_yaml 
 ```
 
-Yields:
+Running `ruby main.rb template baz` yields:
 
 ```yaml
 # => foo: bar 
 # => ---
-# => foo: baz
+# => bar: baz
 ```
 
 ## Getting Started

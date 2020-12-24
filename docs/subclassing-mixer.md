@@ -30,7 +30,7 @@ backend:
   replicas: 3
 ```
 
-A generator that simply returns its values
+A generator method that prints out its values: 
 
 ```ruby
 class MixerOne < Kerbi::Mixer

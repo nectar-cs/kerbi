@@ -40,10 +40,10 @@ status: "successfully"
 Then, run your `main.rb` as you would any Ruby script:
 
 ```bash
-ruby main.rb 
-# or
-bundle exec ruby main.rb
+ruby main.rb template foo 
 ```
+
+> The argument "foo" is the release name (a.k.a namespace) isn't used here but is required nonetheless
 
 The output should be 
 ```yaml

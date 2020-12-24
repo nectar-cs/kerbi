@@ -148,6 +148,11 @@ module Kerbi
       self.inflate_raw_str(raw_yaml, whitelist, blacklist, {})
     end
 
+    def inflate_tam(url, deep_root_key)
+      content = HTTP.post(url, self.values).to_s
+      JSON.parse(content)
+    end
+
     ##
     # Finds all .yaml and .yaml.erb files in a directory
     # @param [String] dir relative or absolute path of the directory

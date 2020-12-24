@@ -337,10 +337,6 @@ Comprehensive method
 [documentation](https://www.rubydoc.info/gems/kerbi/Kerbi/ResBucket#chart-instance_method).
 
 
-
-
-
-
 #### Adding missing repos
 
 In keeping true to Kerbi's functional nature, by default, Kerbi will not add 
@@ -380,6 +376,33 @@ The file is delete as soon as the `helm template` system call has executed.
 
 
 
+## Loading YAML from Templating APIs
+
+A good strategy for complex pipelines is to offload some templating to a remote
+API. 
+
+```ruby
+
+class TemplatingApiMixer < Kerbi::Mixer
+  def run
+    super do |g|
+      g.tam_api(
+        url: 'https://api.codenectar.com/ice-ream',
+        version: '1.0.0'
+      )        
+    end
+  end
+end
+
+```
+
+
+| name           | notes                                                                       | default                      | required |
+|----------------|-----------------------------------------------------------------------------|------------------------------|----------|
+| url            | Base url for templating API **without** version or URL args                 | `nil`                        | true     |
+| version        | value many charts use for interpolation                                     | `nil`                        | true     |
+| release_name   | Release name (aka the namespace) for templating engine to use               | `self.values[:release_name]` | false    |
+| values         | Hash of values to be passed to the templating engine                        | `self.values`                | false    |
 
 
 ## Loading YAML files from Github
