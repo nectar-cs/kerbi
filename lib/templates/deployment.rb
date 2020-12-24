@@ -30,7 +30,8 @@ module Kerbi
                 metadata: metadata(subs),
                 spec: {
                   initContainers: subs[:init_containers],
-                  containers: subs[:containers]
+                  containers: subs[:containers],
+                  imagePullSecrets: subs[:image_pull_secrets] || []
                 }
               }
             }

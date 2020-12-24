@@ -85,15 +85,29 @@ trying:
 
 ## Inline Value Assignments
 
-Finally, Kerbi supports commandline assignments given inline by `--set foo=bar`.
+Kerbi supports commandline assignments given inline by `--set foo=bar` similar to 
+Helm.
 
-For nested keys, use `.` to designate levels of nesting. So:
+For nested keys, use `.` to designate levels of nesting. Example:
 
 ```bash
 ruby main.rb template foo --set networking.ingress.enabled=true
 ```
 
 This is useful for keeping sensitive values out of version control.
+
+
+## Inline Value Assignments for Large Values
+
+Your shell may not accept long commands, which is certain to happen 
+if you try something like `--set secrets.ssh_key=$(cat some/file)`.
+
+For this, pass an **absolute** file path to `--set-from-file` so that the 
+file's contents may be read at templating time:
+
+```bash
+ruby main.rb template foo --set secrets.ssh_key=/abs/path/to/file
+``` 
 
 ## Printing out Values
 
