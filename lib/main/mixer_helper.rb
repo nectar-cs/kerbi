@@ -3,11 +3,21 @@ require "base64"
 module Kerbi
   module MixerHelper
 
-    ##
-    #
-    # @param [String] string to be base64 encoded
-    def b64_encode_secret(string)
-      string ? Base64.encode64(string) : ''
+    # @param [String] string string to be base64 encoded
+    # @return [String] encoded string
+    def b64enc(string)
+      if string
+        Base64.encode64(string).strip
+      else
+        ''
+      end
+    end
+
+    # @param [String] fname absolute path of file to be encoded
+    # @return [String] encoded string
+    def b64enc_file(fname)
+      file_contents = File.read(fname) rescue nil
+      b64enc(file_contents)
     end
 
     ##
