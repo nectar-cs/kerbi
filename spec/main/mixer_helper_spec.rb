@@ -4,9 +4,16 @@ RSpec.describe Kerbi::MixerHelper do
 
   subject { Kerbi::Mixer.new({}) }
 
-  describe '#secrefy' do
+  describe '#b64enc' do
     it 'returns the base64 encoding' do
-      expect(subject.b64_encode_secret('demo')).to eq("ZGVtbw==\n")
+      expect(subject.b64enc('demo')).to eq("ZGVtbw==")
+    end
+  end
+
+  describe '#b64enc_file' do
+    it 'returns the base64 encoding' do
+      fname = tmp_file('demo')
+      expect(subject.b64enc_file(fname)).to eq("ZGVtbw==")
     end
   end
 
