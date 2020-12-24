@@ -21,15 +21,15 @@ RSpec.describe Kerbi::ResBucket do
     Kerbi::Mixer.locate_self root
   end
 
-  describe '#github' do
-    it 'outputs the correct hash list' do
-      subject.github(
-        id: 'nectar-cs/nectarines',
-        file: 'wiz-ci/kerbi/values.yaml'
-      )
-      expect(subject.output.first&.keys.count).to eq(3)
-    end
-  end
+  # describe '#github' do
+  #   it 'outputs the correct hash list' do
+  #     subject.github(
+  #       id: 'nectar-cs/nectarines',
+  #       file: 'wiz-ci/kerbi/values.yaml'
+  #     )
+  #     expect(subject.output.first&.keys.count).to eq(3)
+  #   end
+  # end
 
   describe '#yaml' do
     it 'returns the correct hash list' do
