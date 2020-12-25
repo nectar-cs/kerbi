@@ -132,6 +132,12 @@ RSpec.describe Kerbi::ValuesManager do
         output = subject.read_values_file(path)
         expect(output).to eq({foo: 'bar', baz: 1})
       end
+
+      it 'interpolates erb accessing Kerbi::MixerHelper' do
+        path = tmp_file("foo: bar\nbaz: <%= b64enc('foobar') %>")
+        output = subject.read_values_file(path)
+        expect(output).to eq({foo: 'bar', baz: "Zm9vYmFy"})
+      end
     end
 
     context 'when the file exists' do
@@ -146,7 +152,6 @@ RSpec.describe Kerbi::ValuesManager do
         it 'correctly loads the file' do
           path = tmp_file(JSON.dump({foo: 'bar', baz: 'bar2'}))
           output = subject.read_values_file(path)
-          puts output
           expect(output).to eq({foo: 'bar', baz: 'bar2'})
         end
       end

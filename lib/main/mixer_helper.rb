@@ -7,7 +7,7 @@ module Kerbi
     # @return [String] encoded string
     def b64enc(string)
       if string
-        Base64.encode64(string).strip
+        Base64.strict_encode64(string)
       else
         ''
       end

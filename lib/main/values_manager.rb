@@ -1,3 +1,4 @@
+require_relative './mixer_helper'
 require 'active_support/core_ext/hash/keys'
 require 'active_support/core_ext/hash/deep_merge'
 require 'active_support/core_ext/object/blank'
@@ -63,12 +64,8 @@ module Kerbi
       end
 
       def load_yaml(file_cont)
-        begin
-          interpolated = ERB.new(file_cont).result
-          YAML.load(interpolated).deep_symbolize_keys rescue nil
-        rescue
-          nil
-        end
+        interpolated = Wrapper.new.interpolate(file_cont)
+        YAML.load(interpolated).deep_symbolize_keys# rescue nil
       end
 
       def load_json(file_cont)
@@ -108,5 +105,13 @@ module Kerbi
         result.deep_symbolize_keys
       end
     end
+  end
+end
+
+class Wrapper
+  include Kerbi::MixerHelper
+
+  def interpolate(file_cont)
+    ERB.new(file_cont).result(binding)
   end
 end
