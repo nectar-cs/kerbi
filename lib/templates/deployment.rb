@@ -31,7 +31,8 @@ module Kerbi
                 spec: {
                   initContainers: subs[:init_containers],
                   containers: subs[:containers],
-                  imagePullSecrets: subs[:image_pull_secrets] || []
+                  imagePullSecrets: subs[:image_pull_secrets] || [],
+                  volumes: subs[:volumes]
                 }
               }
             }
