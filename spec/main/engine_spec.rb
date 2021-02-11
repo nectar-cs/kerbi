@@ -12,6 +12,14 @@ RSpec.describe Kerbi::Engine do
     end
   end
 
+  describe "$release_name" do
+    it "is available after reading the values" do
+      ARGV.replace(%w[template foo])
+      kerbi.values
+      expect($release_name).to eq('foo')
+    end
+  end
+
   describe '#cli_exec' do
     context 'with template cmd' do
       it 'prints the template YAML' do

@@ -49,6 +49,10 @@ module Kerbi
       bucket.output.flatten
     end
 
+    def release_name
+      $release_name
+    end
+
     ##
     # Coerces filename of unknown format to an absolute path
     # @param [String] fname simplified or absolute path of file

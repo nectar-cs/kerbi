@@ -101,7 +101,7 @@ module Kerbi
             deep_merge(read_arg_assignments).
             deep_merge(read_arg_file_assignments)
         end
-        result.merge!(release_name: read_release_name) if read_release_name
+        $release_name = read_release_name
         result.deep_symbolize_keys
       end
     end

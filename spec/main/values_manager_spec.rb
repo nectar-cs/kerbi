@@ -36,7 +36,7 @@ RSpec.describe Kerbi::ValuesManager do
 
         it 'still parses args correctly' do
           ARGV.replace %w[template foo --set bar=baz]
-          expect = {bar: "baz", release_name: "foo"}
+          expect = {bar: "baz"}
           expect(Kerbi::ValuesManager.load).to eq(expect)
         end
       end
@@ -198,7 +198,8 @@ RSpec.describe Kerbi::ValuesManager do
 
       it 'merges correctly with a release name' do
         ARGV.replace(%w[template foo-rel --set foo=bar])
-        expect = {foo: "bar", release_name: "foo-rel"}
+        expect = {foo: "bar"}
+        expect(Kerbi::ValuesManager.read_release_name).to eq('foo-rel')
         expect(Kerbi::ValuesManager.load).to eq(expect)
       end
     end

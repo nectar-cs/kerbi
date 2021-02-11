@@ -89,7 +89,7 @@ end
 
 class BarMixer < Kerbi::Mixer
   def run
-    super {|g|g.hash foo: values[:release_name]}
+    super {|g|g.hash foo: release_name}
   end 
 end
 
