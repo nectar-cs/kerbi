@@ -36,6 +36,16 @@ RSpec.describe Kerbi::Engine do
         expect { subject.cli_exec }.to output("x: y\n").to_stdout
       end
     end
+
+    context 'with specific values cmd' do
+      it 'prints the values YAML' do
+        subject.generators = []
+        fname = tmp_file("foo: bart")
+        ARGV.replace(['show', 'values', fname, '--set', 'x=y'])
+        expect { subject.cli_exec }.to output("foo: bart\n").to_stdout
+      end
+    end
+
   end
 
   describe '#gen_yaml' do

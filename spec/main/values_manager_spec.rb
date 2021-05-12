@@ -11,6 +11,16 @@ RSpec.describe Kerbi::ValuesManager do
     end
   end
 
+  describe '.safely_read_values_file' do
+    context 'when the file exists' do
+      it 'returns the right hash' do
+        path = tmp_file("foo: bar\nbaz: <%= 1 %>")
+        output = subject.safely_read_values_file(path)
+        expect(output).to eq({foo: 'bar', baz: 1})
+      end
+    end
+  end
+
   describe ".file_assign_to_h" do
     it "returns the right hash" do
       file_contents = "some\nnasty;text"

@@ -56,6 +56,14 @@ module Kerbi
         ].compact
       end
 
+      def safely_read_values_file(name)
+        candidate_fnames = values_paths(name)
+        decider = -> (fname) { File.exists?(fname) }
+        if (fname = candidate_fnames.find(&decider))
+          read_values_file(fname)
+        end
+      end
+
       #noinspection RubyResolve
       def read_values_file(fname)
         file_cont = File.read(fname) rescue nil

@@ -32,8 +32,8 @@ module Kerbi
       end.join("\n")
     end
 
-    def values_yaml
-      raw = YAML.dump(self.values.deep_stringify_keys)
+    def hash_to_printable_s(hash)
+      raw = YAML.dump((hash || {}).deep_stringify_keys)
       raw.gsub("---\n", '')
     end
 
@@ -44,7 +44,12 @@ module Kerbi
       if ARGV.first == 'template'
         puts self.gen_yaml
       elsif ARGV[0..1] == %w[show values]
-        puts self.values_yaml
+        if (name_like = ARGV[2]) && !name_like.start_with?('-')
+          values = ValuesManager.safely_read_values_file(name_like)
+          puts hash_to_printable_s(values)
+        else
+          puts hash_to_printable_s(self.values)
+        end
       else
         puts "Unrecognized command #{ARGV}"
         exit 1
