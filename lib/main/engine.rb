@@ -41,15 +41,13 @@ module Kerbi
     # Tami-adherent CLI arg routing
     # @return [void] Prints any output to stdout
     def cli_exec
-      if ARGV.first == 'template'
+      if ARGV[0] == 'template'
         puts self.gen_yaml
       elsif ARGV[0..1] == %w[show values]
-        if (name_like = ARGV[2]) && !name_like.start_with?('-')
-          values = ValuesManager.safely_read_values_file(name_like)
-          puts hash_to_printable_s(values)
-        else
-          puts hash_to_printable_s(self.values)
-        end
+        puts hash_to_printable_s(self.values)
+      elsif ARGV[0..1] == %w[show preset]
+        values = ValuesManager.safely_read_values_file(ARGV[2])
+        puts hash_to_printable_s(values)
       else
         puts "Unrecognized command #{ARGV}"
         exit 1

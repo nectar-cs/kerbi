@@ -5,7 +5,7 @@ files = ["lib/kerbi.rb"] +
 
 Gem::Specification.new do |s|
   s.name        = 'kerbi'
-  s.version     = '1.1.33'
+  s.version     = '1.1.34'
   s.date        = '2020-04-19'
   s.summary     = "Multi-strategy Kubernetes manifest templating engine."
   s.description = "Kerbi is a Multi-source, multi-strategy Kubernetes manifest templating engine."
