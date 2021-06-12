@@ -40,13 +40,14 @@ RSpec.describe Kerbi::Template::EnvVar do
 
   describe '.secret_var' do
     it 'outputs the correct form' do
-      result = subject.secret_var('key', 'sec_name', 'sec_key')
+      result = subject.secret_var('key', 'sec_name', 'sec_key', false)
       expect(result).to eq(
         name: 'KEY',
         valueFrom: {
           secretKeyRef: {
             name: 'sec_name',
-            key: 'sec_key'
+            key: 'sec_key',
+            optional: false
           }
         }
       )
@@ -55,13 +56,14 @@ RSpec.describe Kerbi::Template::EnvVar do
 
   describe '.config_var' do
     it 'outputs the correct form' do
-      result = subject.config_var('key', 'sec_name', 'sec_key')
+      result = subject.config_var('key', 'sec_name', 'sec_key', false)
       expect(result).to eq(
         name: 'KEY',
         valueFrom: {
           configMapRef: {
             name: 'sec_name',
-            key: 'sec_key'
+            key: 'sec_key',
+            optional: false
           }
         }
       )
