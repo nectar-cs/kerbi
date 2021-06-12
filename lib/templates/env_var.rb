@@ -11,9 +11,13 @@ module Kerbi
             type, bundle = value.first
             object_name, in_object_key = bundle.first
             if type == :secret
-              secret_var(key.to_s, object_name.to_s, in_object_key)
+              secret_var(key.to_s, object_name.to_s, in_object_key, false)
+            elsif type == :optional_secret
+              secret_var(key.to_s, object_name.to_s, in_object_key, true)
             elsif type == :config
-              config_var(key.to_s, object_name.to_s, in_object_key)
+              config_var(key.to_s, object_name.to_s, in_object_key, false)
+            elsif type == :optional_config
+              config_var(key.to_s, object_name.to_s, in_object_key, true)
             else
               raise "Can't handle #{type}"
             end
@@ -32,25 +36,27 @@ module Kerbi
           { name: name.upcase, value: value }
         end
 
-        def secret_var(name, sec_name, sec_key)
+        def secret_var(name, sec_name, sec_key, optional)
           {
             name: name.upcase,
             valueFrom: {
               secretKeyRef: {
                 name: sec_name,
-                key: sec_key
+                key: sec_key,
+                optional: optional
               }
             }
           }
         end
 
-        def config_var(name, sec_name, sec_key)
+        def config_var(name, sec_name, sec_key, optional)
           {
             name: name.upcase,
             valueFrom: {
               configMapRef: {
                 name: sec_name,
-                key: sec_key
+                key: sec_key,
+                optional: optional
               }
             }
           }
