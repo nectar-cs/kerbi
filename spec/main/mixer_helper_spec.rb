@@ -18,6 +18,24 @@ RSpec.describe Kerbi::MixerHelper do
     end
   end
 
+  describe "#embed_in_yaml" do
+    context "with a hash" do
+      it "returns the correct string" do
+        contents = {
+          foo: "<%= embed_in_yaml({em: 'bed'}, 1) %>"
+        }
+
+        result = subject.run do |r|
+          r.yaml tmp_file(YAML.dump(contents))
+        end
+
+        puts result
+        #todo finish this spec
+      end
+    end
+  end
+
+
   describe '#b64enc_file' do
     it 'returns the base64 encoding' do
       fname = tmp_file('demo')

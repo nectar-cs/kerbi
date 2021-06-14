@@ -3,6 +3,16 @@ require "base64"
 module Kerbi
   module MixerHelper
 
+    # @param [Array|Hash] hash_or_array hash or array
+    # @return [String] encoded string
+    def embed_in_yaml(hash_or_array, indentation)
+      raw = YAML.dump(hash_or_array).sub("---", "")
+      indented_lines = raw.split("\n").map do |line|
+        line.indent(indentation)
+      end
+      indented_lines.join("\n")
+    end
+
     # @param [String] string string to be base64 encoded
     # @return [String] encoded string
     def b64enc(string)

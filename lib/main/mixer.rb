@@ -2,6 +2,7 @@ require 'yaml'
 require "http"
 require 'active_support/core_ext/hash/deep_merge'
 require 'active_support/core_ext/hash/keys'
+require 'active_support/core_ext/string/indent.rb'
 require_relative './mixer_helper'
 require_relative './../utils/utils'
 require_relative './../utils/helm'
